@@ -14,7 +14,7 @@ def login(usernames, passwords):
     # get input from user
     username = input("Username: ")
     if username not in usernames:
-      print("Username not found")
+      print("Username not found\nPlease try again")
     else:
       username_idx = usernames.index(username)
 
@@ -24,9 +24,40 @@ def login(usernames, passwords):
     # get input from user
     password = input("Password: ")
     if password != passwords[username_idx]:
-      print("Password incorrect")
+      print("Password incorrect\nPlease try again")
 
   print("Logged in!")
 
+role_list = ["Choose your role:","1. Admin","2. All Customers (Registered / Not-Registered)","3. Registered Customer"]
 
-# 
+def exit(back):
+  if back == 0:
+    print("--Main Menu--")
+    for i in range(len(role_list)):
+      print(role_list[i])
+  else:
+    quit()
+  
+login(usernames, passwords)
+back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
+exit(back)
+
+if back == 1:
+  #admin function
+elif back == 2:
+  try:
+      #allcustomers_function
+  except:
+      print("Invalid input Please try again")
+      back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
+      exit(back)
+elif back == 3:
+  try:
+      #registeredcustomer_function
+  except:
+      print("Invalid input Please try again")
+      back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
+      exit(back)
+else:
+  back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
+  exit(back)
