@@ -35,29 +35,34 @@ def exit(back):
     print("--Main Menu--")
     for i in range(len(role_list)):
       print(role_list[i])
+      return role 
   else:
     quit()
-  
+
+def choose_role(role):
+  if role == 1:
+    #admin function
+  elif role == 2:
+    try:
+        #allcustomers_function
+    except:
+        print("Invalid input Please try again")
+        return back
+        exit(back)
+  elif role == 3:
+    try:
+        #registeredcustomer_function
+    except:
+        print("Invalid input Please try again")
+        return back
+        exit(back)
+  else:
+    return back
+    exit(back)
+
 login(usernames, passwords)
 back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
 exit(back)
+role = input("Choose your role: ")
+choose_role(role)
 
-if back == 1:
-  #admin function
-elif back == 2:
-  try:
-      #allcustomers_function
-  except:
-      print("Invalid input Please try again")
-      back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
-      exit(back)
-elif back == 3:
-  try:
-      #registeredcustomer_function
-  except:
-      print("Invalid input Please try again")
-      back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
-      exit(back)
-else:
-  back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
-  exit(back)
