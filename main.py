@@ -1,13 +1,31 @@
 print("Welcome to SUPER CAR RENTAL SERVICES!!!")
 
-# LOGIN ================================
+# UTILS ================================
+# get integer value from user
+def get_user_int() -> int:
+  text = ""
+  # check if text is digit or not
+  while not text.isdigit():
+    # get input from user
+    text = input("number: ")
 
+    # check if text is digit or not
+    if not text.isdigit():
+      # print error message
+      print("is not a digit\nPlease try again")
+
+  return int(text)
+# UTILS ================================
+
+
+
+# LOGIN ================================
 #             0      1      2
 usernames = ["ali", "abu", "ahmad"]
 #             0          1          2
 passwords = ["alipass", "abupass", "ahmadpass"]
 
-def login(usernames, passwords):
+def login(usernames, passwords) -> None:
   username = ""
   username_idx = 0
   while username not in usernames:
@@ -27,42 +45,52 @@ def login(usernames, passwords):
       print("Password incorrect\nPlease try again")
 
   print("Logged in!")
+# LOGIN ================================
 
-role_list = ["Choose your role:","1. Admin","2. All Customers (Registered / Not-Registered)","3. Registered Customer"]
+# MAIN MENU ============================
+def main_menu() -> None:
+  user_type_list = [
+    "Choose a user type:\n",
+    "1. Admin",
+    "2. All Customers (Registered / Not-Registered)",
+    "3. Registered Customer\n"
+  ]
+  print("\n"*10 + "--Main Menu--")
+  for i in range(len(user_type_list)):
+    print(user_type_list[i])
+# MAIN MENU ============================
 
-def exit(back):
-  if back == 0:
-    print("--Main Menu--")
-    for i in range(len(role_list)):
-      print(role_list[i])
-      return role 
-  else:
-    quit()
 
-def choose_role(role):
-  if role == 1:
-    #admin function
-  elif role == 2:
+def choose_user_type(user_type):
+  if user_type == 1:
+    print("1")
+    # admin function
+  elif user_type == 2:
     try:
-        #allcustomers_function
+      print("2")
+      # all customers function
+      pass
     except:
-        print("Invalid input Please try again")
-        return back
-        exit(back)
-  elif role == 3:
+      print("Invalid input Please try again")
+  elif user_type == 3:
     try:
-        #registeredcustomer_function
+      print("3")
+      pass
+      # registered customer function
     except:
-        print("Invalid input Please try again")
-        return back
-        exit(back)
+      print("Invalid input Please try again")
   else:
-    return back
-    exit(back)
+    pass
 
-login(usernames, passwords)
-back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
-exit(back)
-role = input("Choose your role: ")
-choose_role(role)
+def main() -> None:
+  while True:
+    main_menu()
+    user_type = int(input("> "))
+    choose_user_type(user_type)
 
+    back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
+
+if __name__ == "__main__":
+  # make sure that this is the sript that we are running
+  # this will not run if this script is imported instead of ran directly
+  main()
