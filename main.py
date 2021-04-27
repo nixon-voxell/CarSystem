@@ -1,31 +1,39 @@
 print("Welcome to SUPER CAR RENTAL SERVICES!!!")
 
-# UTILS ================================
+# region UTILS ================================
 # get integer value from user
-def get_user_int() -> int:
+def get_index(lst:list, item) -> int:
+  idx = -1
+  for i in range(len(lst)):
+    if item == lst[i]:
+      idx = i
+
+  return idx
+
+def get_user_int(prompt_msg:str) -> int:
   text = ""
   # check if text is digit or not
   while not text.isdigit():
     # get input from user
-    text = input("number: ")
+    text = input(prompt_msg)
 
     # check if text is digit or not
     if not text.isdigit():
       # print error message
-      print("is not a digit\nPlease try again")
+      print("Input is not an integer\nPlease try again\n")
 
   return int(text)
-# UTILS ================================
+# endregion  ==================================
 
 
 
-# LOGIN ================================
+# region LOGIN ================================
 #             0      1      2
 usernames = ["ali", "abu", "ahmad"]
 #             0          1          2
 passwords = ["alipass", "abupass", "ahmadpass"]
 
-def login(usernames, passwords) -> None:
+def login(usernames:list, passwords:list) -> None:
   username = ""
   username_idx = 0
   while username not in usernames:
@@ -34,7 +42,7 @@ def login(usernames, passwords) -> None:
     if username not in usernames:
       print("Username not found\nPlease try again")
     else:
-      username_idx = usernames.index(username)
+      username_idx = get_index(usernames, username)
 
   password = ""
   # check if password is correct corresponding to the username_idx
@@ -45,9 +53,9 @@ def login(usernames, passwords) -> None:
       print("Password incorrect\nPlease try again")
 
   print("Logged in!")
-# LOGIN ================================
+# endregion ===================================
 
-# MAIN MENU ============================
+# region MAIN MENU ============================
 def main_menu() -> None:
   user_type_list = [
     "Choose a user type:\n",
@@ -58,7 +66,7 @@ def main_menu() -> None:
   print("\n"*10 + "--Main Menu--")
   for i in range(len(user_type_list)):
     print(user_type_list[i])
-# MAIN MENU ============================
+# endregion ===================================
 
 
 def choose_user_type(user_type):
