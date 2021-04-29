@@ -54,7 +54,7 @@ def login(usernames:list, passwords:list) -> None:
 
   print("Logged in!")
 # endregion ===================================
-
+login = login(usernames:list, passwords:list)
 # region MAIN MENU ============================
 def main_menu() -> None:
   user_type_list = [
@@ -68,37 +68,51 @@ def main_menu() -> None:
     print(user_type_list[i])
 # endregion ===================================
 
+admin_list = ["1. Add Cars to be rented out.","2. Modify Car Details.","3. Display Records of..","4. Search Specific Record of..","5. Return a Rented Car."]
+admin_func = [add_cars, modify_carDetails, display_records, search_records]
+def admin():
+  login
+  for i in range(len(admin_list)):
+    print(admin_list[i])
+    no = get_user_int("Choose option(1-5): ")
+    admin_func[no-1]()
 
-def choose_user_type(user_type):
-  if user_type == 1:
-    print("1")
-    # admin function
-  elif user_type == 2:
-    try:
-      print("2")
-      # all customers function
-      pass
-    except:
-      print("Invalid input Please try again")
-  elif user_type == 3:
-    try:
-      print("3")
-      pass
-      # registered customer function
-    except:
-      print("Invalid input Please try again")
-  else:
-    pass
+allCustomer_list = ["1. View all cars available for rent.","2. Create new Account."]
+allCustomer_func = [view_cars, create_acc]
+def all_customer():
+  for i in range(len(allCustomer_list)):
+    print(allCustomer_list[i])
+    no = get_user_int("Choose option(1/2): ")
+    admin_func[no-1]()
+
+registeredCustomer_list = ["1. Modify Personal Details.","2. View Personal Rental History.", "3. View Detail of Cars to be Rented Out. ", "4. Select and Book a car for a specific duration", "5. Do payment to confirm Booking."]
+registeredCustomer_func = [modify_personalDetails, view_history, view_rentedCars, book_cars, payment]
+def registered_customer():
+  login
+  for i in range(len(registeredCustomer_list)):
+    print(registeredCustomer_list[i])
+    no = get_user_int("Choose option(1-5): ")
+    registeredCustomer_func[no-1]()
+
+user_func = [admin, all_customer, registered_customer]
 
 def main() -> None:
   while True:
     main_menu()
-    user_type = int(input("> "))
-    choose_user_type(user_type)
+    no = get_user_int("Choose user(1-3): ")
+    user_func[no-1]()
 
-    back = input("Do you want to continue? To exit to the Main Menu type ‘0’, To Terminate Program type '1': ")
+def terminate():
+  quit()
+
+back_func = [main_menu, terminate]
+def exit() -> None:
+  print("Do you want to continue? To exit to the Main Menu type ‘1’, To Terminate Program type '2': ")
+  no = get_user_int("Choose option(1/2): ")
+  back_func[no-1]()
 
 if __name__ == "__main__":
   # make sure that this is the sript that we are running
   # this will not run if this script is imported instead of ran directly
   main()
+
