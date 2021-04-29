@@ -1,36 +1,43 @@
-def get_user_int(prompt_msg:str) -> int:
-  text = ""
-  # check if text is digit or not
-  while not text.isdigit():
-    # get input from user
-    text = input(prompt_msg)
+# get username and password
+# def get_usernames_and_passwords(filename):
+#   customer_file = open(filename, "r", encoding="utf-8")
+#   customer_file_content = customer_file.read()
+#   lines = customer_file_content.split("\n")
+#
+#   usernames = []
+#   passwords = []
+#
+#   # loop through the entire list lines in the text file and exclude the last line
+#   for line_idx in range(len(lines) - 1):
+#     # check if line_idx is an even or odd number
+#     if line_idx % 2 == 0:
+#       usernames.append(lines[line_idx])
+#     else:
+#       passwords.append(lines[line_idx])
+#
+#   return usernames, passwords
+#
+# usernames, passwords = get_usernames_and_passwords("./customers.txt")
+#
+# print(usernames)
+# print(passwords)
 
-    # check if text is digit or not
-    if not text.isdigit():
-      # print error message
-      print("Input is not an integer\nPlease try again\n")
+# register new username and password
+def register_new_user(filename:str) -> None:
+  username = ""
+  password = ""
 
-  return int(text)
+  while username == "":
+    username = input("Enter username: ")
+    if username == "":
+      print("Username cannot be empty!\n")
 
-def func1():
-  print("in func1")
+  while password == "":
+    password = input("Enter password: ")
+    if password == "":
+      print("Password cannot be empty!\n")
 
-def func2():
-  print("in func2")
+  print(f"Your user and pass is: {username}, {password}")
 
-def func3():
-  print("in func3")
-
-func_list = [func1, func2, func3]
-
-print("Input a function number to run (1/2/3)")
-no = get_user_int("Number: ")
-func_list[no-1]()
-
-# find a pattern between if statement and the function call
-# if no == 1:
-#   func_list[0]()
-# elif no == 2:
-#   func_list[1]()
-# elif no == 3:
-#   func_list[2]()
+  customer_file = open(filename, "a", encoding="utf-8")
+  customer_file.write(f"{username}\n{password}\n")
