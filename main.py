@@ -1,15 +1,6 @@
 print("Welcome to SUPER CAR RENTAL SERVICES!!!")
 
 # region UTILS ================================
-# get integer value from user
-def get_index(lst:list, item) -> int:
-  idx = -1
-  for i in range(len(lst)):
-    if item == lst[i]:
-      idx = i
-
-  return idx
-
 # forcefully get integer input from user
 def get_user_int(prompt_msg:str) -> int:
   text = ""
@@ -79,7 +70,7 @@ def login(usernames:list, passwords:list) -> None:
     if username not in usernames:
       print("Username not found\nPlease try again")
     else:
-      username_idx = get_index(usernames, username)
+      username_idx = usernames.index(username)
 
   password = ""
   # check if password is correct corresponding to the username_idx
