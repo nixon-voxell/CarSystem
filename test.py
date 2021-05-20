@@ -1,43 +1,46 @@
-# get username and password
-# def get_usernames_and_passwords(filename):
-#   customer_file = open(filename, "r", encoding="utf-8")
-#   customer_file_content = customer_file.read()
-#   lines = customer_file_content.split("\n")
-#
-#   usernames = []
-#   passwords = []
-#
-#   # loop through the entire list lines in the text file and exclude the last line
-#   for line_idx in range(len(lines) - 1):
-#     # check if line_idx is an even or odd number
-#     if line_idx % 2 == 0:
-#       usernames.append(lines[line_idx])
-#     else:
-#       passwords.append(lines[line_idx])
-#
-#   return usernames, passwords
-#
-# usernames, passwords = get_usernames_and_passwords("./customers.txt")
-#
-# print(usernames)
-# print(passwords)
+def get_file_info(filename:str) -> tuple:
+  file = open(filename, "r", encoding="utf-8")
+  file_content = file.read()
+  lines = file_content.split("\n")
 
-# register new username and password
-def register_new_user(filename:str) -> None:
-  username = ""
-  password = ""
+  content1 = []
+  content2 = []
 
-  while username == "":
-    username = input("Enter username: ")
-    if username == "":
-      print("Username cannot be empty!\n")
+  # loop through the entire list lines in the text file and exclude the last line
+  for line_idx in range(len(lines) - 1):
+    # check if line_idx is an even or odd number
+    if line_idx % 2 == 0:
+      content1.append(lines[line_idx])
+    else:
+      content2.append(lines[line_idx])
 
-  while password == "":
-    password = input("Enter password: ")
-    if password == "":
-      print("Password cannot be empty!\n")
+  return content1, content2
 
-  print(f"Your user and pass is: {username}, {password}")
+def get_user_not_empty(prompt_msg:str, error_msg:str) -> str:
+  usr_input = ""
+  while usr_input == "":
+    usr_input = input(prompt_msg)
+    if usr_input == "":
+      print(error_msg + "\n")
 
-  customer_file = open(filename, "a", encoding="utf-8")
-  customer_file.write(f"{username}\n{password}\n")
+  return usr_input
+
+def get_user_float(prompt_msg:str) -> float:
+  usr_input = ""
+  # check if usr_input is a float or not
+  while not usr_input.replace(".", "", 1).isdigit():
+    # get usr_input from user
+    usr_input = input(prompt_msg)
+    # if usr_input is not a float, print error msg
+    if not usr_input.replace(".", "", 1).isdigit():
+      print("Input is not a number\nPlease try again\n")
+
+  return float(usr_input)
+
+def view_cars():
+  lines = get_file_info("cars.txt")
+  for line_idx in lines:
+    print(line_idx[0], line_idx[1])
+
+view_cars()
+
