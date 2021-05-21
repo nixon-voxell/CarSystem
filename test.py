@@ -38,9 +38,18 @@ def get_user_float(prompt_msg:str) -> float:
   return float(usr_input)
 
 def view_cars():
-  lines = get_file_info("cars.txt")
-  for line_idx in lines:
-    print(line_idx[0], line_idx[1])
+  cars, price = get_file_info("cars.txt")
+  for i in range(len(cars)):
+    car_detail = cars[i].split("|")
+    price_detail = price[i].split("|")
+    print(f"Cars: {car_detail[0]}, {car_detail[1]}")
+    print(f"Description: {car_detail[2]}")
+    print(f"Hourly Price: {price_detail[0]}")
+    print(f"Daily Price: {price_detail[1]}")
 
 view_cars()
 
+# Car: Brand, Model
+# Description: Description
+# Hourly Price: Hourly Price
+# Daily Price: Daily Price

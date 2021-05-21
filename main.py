@@ -170,7 +170,16 @@ def create_acc():
   register_new_user("./customers.txt", usernames)
 
 def view_cars():
-  pass
+  cars, price = get_file_info("cars.txt")
+  for i in range(len(cars)):
+    car_detail = cars[i].split("|")
+    price_detail = price[i].split("|")
+    print("")
+    print("-----Car List-----")
+    print(f"Cars: {car_detail[0]}, {car_detail[1]}")
+    print(f"Description: {car_detail[2]}")
+    print(f"Hourly Price: {price_detail[0]}")
+    print(f"Daily Price: {price_detail[1]}")
 
 def all_customer():
   customer_list = [
@@ -181,8 +190,8 @@ def all_customer():
 
   for i in range(len(customer_list)):
     print(customer_list[i])
-    no = get_user_int("Choose option(1/2): ")
-    customer_func[no-1]()
+  no = get_user_int("Choose option(1/2): ")
+  customer_func[no-1]()
 # endregion ===================================
 
 # region REGISTERED CUSTOMER MENU =============
@@ -229,6 +238,7 @@ def main() -> None:
 
 back_func = [main_menu, exit]
 def exit_program() -> None:
+  print("")
   print("Do you want to continue? To exit to the Main Menu type ‘1’, To Terminate Program type '2': ")
   no = get_user_int("Choose option(1/2): ")
   back_func[no-1]()
