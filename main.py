@@ -146,6 +146,15 @@ def add_cars(filename:str="./cars.txt") -> None:
   file = open(filename, "a", encoding="utf-8")
   file.write(f"{car_detail}\n{hourly_price}|{daily_price}\n")
 
+def modify_car_details():
+  pass
+
+def display_records():
+  pass
+
+def search_records():
+  pass
+
 def admin():
   admin_list = [
   "1. Add Cars to be rented out.",
@@ -160,8 +169,8 @@ def admin():
   login(usernames, passwords)
   for i in range(len(admin_list)):
     print(admin_list[i])
-    no = get_user_int("Choose option(1-5): ")
-    admin_func[no-1]()
+  no = get_user_int("Choose option(1-5): ")
+  admin_func[no-1]()
 # endregion ===================================
 
 # region CUSTOMER MENU ========================
@@ -195,22 +204,37 @@ def all_customer():
 # endregion ===================================
 
 # region REGISTERED CUSTOMER MENU =============
-registered_customer_list = [
-  "1. Modify Personal Details.",
-  "2. View Personal Rental History.",
-  "3. View Detail of Cars to be Rented Out. ",
-  "4. Select and Book a car for a specific duration",
-  "5. Do payment to confirm Booking."
-]
+def modify_personal_details():
+  pass
+
+def view_history():
+  pass
+
+def view_rented_cars():
+  pass
+
+def book_cars():
+  pass
+
+def payment():
+  pass
+
 def registered_customer():
+  registered_customer_list = [
+    "1. Modify Personal Details.",
+    "2. View Personal Rental History.",
+    "3. View Detail of Cars to be Rented Out. ",
+    "4. Select and Book a car for a specific duration",
+    "5. Do payment to confirm Booking."
+  ]
   registered_customer_func = [modify_personal_details, view_history, view_rented_cars, book_cars, payment]
 
   usernames, passwords = get_file_info("./customers.txt")
   login(usernames, passwords)
   for i in range(len(registered_customer_list)):
     print(registered_customer_list[i])
-    no = get_user_int("Choose option(1-5): ")
-    registered_customer_func[no-1]()
+  no = get_user_int("Choose option(1-5): ")
+  registered_customer_func[no-1]()
 # endregion ===================================
 
 # region MAIN PROGRAM ===================================
@@ -249,3 +273,4 @@ if __name__ == "__main__":
   # make sure that this is the sript that we are running
   # this will not run if this script is imported instead of running directly
   main()
+
