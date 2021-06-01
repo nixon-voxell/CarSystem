@@ -88,24 +88,6 @@ def modify_file_info(filename, no, line, info:str) -> tuple:
   
   return content1, content2
 
-# SAMPLE.TXT
-# Line1
-# Change This Line
-# Line3
-# file = open("cars.txt", "r")
-# list_of_lines = file.readlines()
-# list_of_lines[no-1] = info,"\n"
-
-# file = open("cars.txt", "w")
-# file.writelines(list_of_lines)
-# file.close()
-
-# SAMPLE.TXT
-# Line1
-# Line2
-# Line3
-
-
 def modify_car_details():
   no = ""
   lines = ""
@@ -140,9 +122,6 @@ def modify_car_details():
 
 modify_car_details()
 
-
-
-  
 # Car: Brand, Model
 # Description: Description
 # Hourly Price: Hourly Price
