@@ -41,8 +41,8 @@ def get_user_not_empty(prompt_msg:str, error_msg:str) -> str:
 # region USERNAMES AND PASSWORDS ==============
 # get usernames and passwords from a text file
 def get_file_info(filename:str) -> tuple:
-  file = open(filename, "r", encoding="utf-8")
-  file_content = file.read()
+  with open(filename, "r", encoding="utf-8") as file:
+    file_content = file.read()
   lines = file_content.split("\n")
 
   content1 = []
@@ -180,15 +180,15 @@ def create_acc():
 
 def view_cars():
   cars, price = get_file_info("cars.txt")
+  print("========== Car List ==========")
   for i in range(len(cars)):
     car_detail = cars[i].split("|")
     price_detail = price[i].split("|")
-    print("")
-    print("-----Car List-----")
+    print(f"Car Index: {i+1}")
     print(f"Cars: {car_detail[0]}, {car_detail[1]}")
     print(f"Description: {car_detail[2]}")
     print(f"Hourly Price: {price_detail[0]}")
-    print(f"Daily Price: {price_detail[1]}")
+    print(f"Daily Price: {price_detail[1]}\n")
 
 def all_customer():
   customer_list = [
@@ -249,6 +249,13 @@ def main_menu() -> None:
   for i in range(len(user_type_list)):
     print(user_type_list[i])
 
+def exit_program() -> None:
+  back_func = [main_menu, exit]
+  print("")
+  print("Do you want to continue? To exit to the Main Menu type '1', To Terminate Program type '2': ")
+  no = get_user_int("Choose option(1/2): ")
+  back_func[no-1]()
+
 def main() -> None:
   user_func = [admin, all_customer, registered_customer]
   print("Welcome to SUPER CAR RENTAL SERVICES!!!")
@@ -259,14 +266,6 @@ def main() -> None:
     user_func[no-1]()
 
     exit_program()
-
-back_func = [main_menu, exit]
-def exit_program() -> None:
-  print("")
-  print("Do you want to continue? To exit to the Main Menu type ‘1’, To Terminate Program type '2': ")
-  no = get_user_int("Choose option(1/2): ")
-  back_func[no-1]()
-
 # endregion ===================================
 
 if __name__ == "__main__":

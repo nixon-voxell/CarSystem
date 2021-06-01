@@ -1,6 +1,6 @@
 def get_file_info(filename:str) -> tuple:
-  file = open(filename, "r", encoding="utf-8")
-  file_content = file.read()
+  with open(filename, "r", encoding="utf-8") as file:
+    file_content = file.read()
   lines = file_content.split("\n")
 
   content1 = []
@@ -39,15 +39,15 @@ def get_user_float(prompt_msg:str) -> float:
 
 def view_cars():
   cars, price = get_file_info("cars.txt")
+  print("-----Car List-----")
   for i in range(len(cars)):
     car_detail = cars[i].split("|")
     price_detail = price[i].split("|")
-    print("")
-    print("-----Car List-----")
+    print(f"Car Index: {i+1}")
     print(f"Cars: {car_detail[0]}, {car_detail[1]}")
     print(f"Description: {car_detail[2]}")
     print(f"Hourly Price: {price_detail[0]}")
-    print(f"Daily Price: {price_detail[1]}")
+    print(f"Daily Price: {price_detail[1]}\n")
 
 view_cars()
 
@@ -66,61 +66,64 @@ def get_user_int(prompt_msg:str) -> int:
   return int(usr_input)
   
 # modify file lines from a text file
-def modify_file_info(filename, no, line, info:str) -> tuple:
-  file = open(filename, "r", encoding="utf-8")
-  file_content = file.read()
-  lines = file_content.split("\n")
-  lines[no-1][line] = info,"\n"
+def modify_file_info(filename:str, location:int, is_content1:bool, info:str) -> None:
+  # location is the car idx position in the lists of strings
+  # content1 is even lines, content2 is odd lines in a file
+  content1, content2 = get_file_info(filename)
+  # edit content1[location]/content2[location] based on is_content1
+  if is_content1: content1[location] = info
+  else: content2[location] = info
 
-  file = open("cars.txt", "w")
-  file.writelines(lines)
+  final_string = ""
+  for content_idx in range(len(content1)):
+    # idx is an integer which will increase until the range ends
+    # len must use with list to get int (number of items)
+    final_string += content1[content_idx] + "\n"
+    final_string += content2[content_idx] + "\n"
+    # final_string += "a"
+    # equivalent to
+    # final_string = final_string + "a"
+    # if final_string is "John"
+    # final_string += a will be "Johna"
 
-  content1 = []
-  content2 = []
+  with open(filename, "w") as file:
+    file.write(final_string)
+  # use with to auto close, followed by as file
 
-  # loop through the entire list lines in the text file and exclude the last line
-  for line_idx in range(len(lines) - 1):
-    # check if line_idx is an even or odd number
-    if line_idx % 2 == 0:
-      content1.append(lines[line_idx])
-    else:
-      content2.append(lines[line_idx])
-  
-  return content1, content2
-
+# modify car details
 def modify_car_details():
-  no = ""
-  lines = ""
-  info = ""
-  cars, price = modify_file_info("cars.txt", no, lines, info)
+  cars, prices = get_file_info("cars.txt")
+  car_details = []
+  price_details = []
   for i in range(len(cars)):
-    car_detail = cars[i].split("|")
-    price_detail = price[i].split("|")
+    car_details.append(cars[i].split("|"))
+    price_details.append(prices[i].split("|"))
 
-  print("Which car detail you want to modify?")
-  print("1. Car Detail\n","2. Price Detail")
-  input = get_user_int("Enter (1/2): ")
-  
-  if input == 1:
+  view_cars()
+  car_idx = -1
+  while car_idx >= len(car_details) or car_idx < 0:
+    car_idx = get_user_int("Choose a car index to edit: ") - 1
+
     print("Which car detail you want to modify?")
-    print("1. Brand\n","2. Model\n","3.Description\n")
-    no = get_user_int("Choose car detail(1-3): ")
-    line = get_user_int("Enter line to modify: ")
-    info = input("Enter detail: ")
-    content = [car_detail[0][line], car_detail[1][line], car_detail[2][line]]
-    content[no-1]()
-    car_detail, _ = modify_file_info("cars.txt", no, line, info)
-  else:
-    print("Which price detail you want to modify?")
-    print("1. Hourly Price\n","2. Daily Price")
-    no = get_user_int("Choose price detail(1/2): ")
-    line = get_user_int("Enter line to modify: ")
-    info = input("Enter price: ")
-    content = [price_detail[0][line], price_detail[1][line]]
-    content[no-1]()
-    _, price_detail = modify_file_info("cars.txt", no, line, info)
+    print("1. Car Detail\n","2. Price Detail")
+    choose_detail = get_user_int("Enter (1/2): ")
+    
+    if choose_detail == 1:
+      print("Choose car detail to be modified:")
+      print("1. Brand\n","2. Model\n","3. Description\n")
+      detail_idx = get_user_int("Choose car detail(1-3): ") - 1
+      info = get_user_not_empty("Enter car detail", "Nothing is entered\nPlease try again!")
+      info = f"|{car_details}+={info[detail_idx]}|"
+      modify_file_info("./cars.txt", car_idx, True, info)
+    else:
+      print("Which price detail you want to modify?")
+      print("1. Hourly Price\n","2. Daily Price")
+      detail_idx = get_user_int("Choose price detail(1/2): ") - 1
+      info = get_user_not_empty("Enter Car's renting price", "Nothing is entered\nPlease try again!")
+      info = f"{price_details}+={info[detail_idx]}|"
+      modify_file_info("./cars.txt", car_idx, False, info)
 
-modify_car_details()
+  modify_car_details()
 
 # Car: Brand, Model
 # Description: Description
