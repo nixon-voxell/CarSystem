@@ -1,0 +1,10 @@
+Nissan|Almera|City drives, running errands, road trips on a budget, and going meetings in town.
+5.9|59.0
+Renault|Captur|Interstate business trips, wooing your date, and stylish weekend getaways.
+11.9|119.0
+Nissan|Teana|Impressing business partners, outstation golf trips, and picking up your VIPs from the airport.
+24.9|249.0
+Nissan|Serena S-Hybrid|Long drives out of the city while reducing carbon footprint.
+26.9|269.0
+toyota|almera|travelling
+30.0|315.0
