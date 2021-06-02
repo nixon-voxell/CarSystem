@@ -1,4 +1,4 @@
-def get_file_info(filename:str) -> tuple:
+def get_file_new_info(filename:str) -> tuple:
   with open(filename, "r", encoding="utf-8") as file:
     file_content = file.read()
   lines = file_content.split("\n")
@@ -37,8 +37,23 @@ def get_user_float(prompt_msg:str) -> float:
 
   return float(usr_input)
 
+# forcefully get integer input within a range from user
+def get_user_int_range(prompt_msg:str, range_min:int, range_max:int, exceed_range_error_msg:str="Input has exceed the range given!\n") -> int:
+  """
+  get user int and only accept a range of int, anything outside the range will be rejected
+
+  ex: range_min: 0, range_max: 5 only accepts (0, 1, 2, 3, 4, 5)
+  """
+  usr_int = range_min - 1
+  while usr_int < range_min or usr_int > range_max:
+    usr_int = get_user_int(prompt_msg)
+    if usr_int < range_min or usr_int > range_max:
+      print(exceed_range_error_msg)
+
+  return usr_int
+
 def view_cars():
-  cars, price = get_file_info("car_test.txt")
+  cars, price = get_file_new_info("car_test.txt")
   print("-----Car List-----")
   for i in range(len(cars)):
     car_detail = cars[i].split("|")
@@ -66,14 +81,14 @@ def get_user_int(prompt_msg:str) -> int:
   return int(usr_input)
   
 # modify file lines from a text file
-def modify_file_info(filename:str, location:int, is_content1:bool, info:str) -> None:
+def modify_file_new_info(filename:str, location:int, is_content1:bool, new_info:str) -> None:
   # location is the car idx position in the lists of strings
   # content1 is even lines, content2 is odd lines in a file
-  content1, content2 = get_file_info(filename)
+  content1, content2 = get_file_new_info(filename)
   # edit content1[location]/content2[location] based on is_content1
-  if is_content1: content1[location] = info
+  if is_content1: content1[location] = new_info
   # cars[(cardetails+pricedetails)idx]
-  else: content2[location] = info
+  else: content2[location] = new_info
   # prices[(cardetails+pricedetails)idx]
 
   final_string = ""
@@ -94,42 +109,43 @@ def modify_file_info(filename:str, location:int, is_content1:bool, info:str) -> 
 
 # modify car details
 def modify_car_details():
-  cars, prices = get_file_info("car_test.txt")
+  cars, prices = get_file_new_info("car_test.txt")
   car_details = []
   price_details = []
   for i in range(len(cars)):
+    # split makes strings into list in list
     car_details.append(cars[i].split("|"))
     price_details.append(prices[i].split("|"))
-  # split makes strings into list in list
-  view_cars()
-  car_idx = -1
-  while car_idx >= len(car_details) or car_idx < 0:
-    car_idx = get_user_int("Choose a car index to edit: ") - 1
 
-    print("Which car detail you want to modify?")
-    print("1. Car Detail\n","2. Price Detail")
-    choose_detail = get_user_int("Enter (1/2): ")
-    
-    if choose_detail == 1:
-      print("Choose car detail to be modified:")
-      print("1. Brand\n","2. Model\n","3. Description\n")
-      detail_idx = get_user_int("Choose car detail(1-3): ") - 1
-      info = get_user_not_empty("Enter New Car Detail: ", "Nothing is entered\nPlease try again!")
-      modification = car_details[car_idx][detail_idx] = info
-      # contatenate strings with "|"
-      for car_idx in range(len(car_details)):
-        car_details[car_idx][:3] += "|"
-      modify_file_info("./car_test.txt", car_idx, True, modification)
-    else:
-      print("Which price detail you want to modify?")
-      print("1. Hourly Price\n","2. Daily Price")
-      detail_idx = get_user_int("Choose price detail(1/2): ") - 1
-      info = get_user_float("Enter New Car Rent Price: ")
-      modification = price_details[car_idx][detail_idx] = info
-      # contatenate strings with loop and "|"
-      for car_idx in range(len(price_details)):
-        price_details[car_idx][:2] += "|"
-      modify_file_info("./car_test.txt", car_idx, False, str(modification))
+  view_cars()
+  car_idx = get_user_int_range("Choose a car index to edit: ", 1, len(car_details)) - 1
+
+  print("\nWhich car detail you want to modify?")
+  print("\n1. Car Detail\n2. Price Detail")
+  choose_detail = get_user_int_range("\nEnter (1/2): ", 1, 2)
+  
+  if choose_detail == 1:
+    print("\nChoose car detail to be modified:")
+    print("\n1. Brand\n2. Model\n3. Description\n")
+    detail_idx = get_user_int_range("\nChoose car detail (1-3): ", 1, 3) - 1
+    new_info = get_user_not_empty("\nEnter new car detail: ", "Nothing is entered\nPlease try again!\n")
+
+    car_details[car_idx][detail_idx] = new_info
+    modification = car_details[car_idx]
+    modification = "|".join(modification)
+
+    modify_file_new_info("./car_test.txt", car_idx, True, modification)
+  else:
+    print("\nWhich price detail you want to modify?")
+    print("\n1. Hourly Price\n2. Daily Price")
+    detail_idx = get_user_int_range("\nChoose price detail(1/2): ", 1, 2) - 1
+    new_info = get_user_float("\nEnter new car rent price: ")
+
+    price_details[car_idx][detail_idx] = str(new_info)
+    modification = price_details[car_idx]
+    modification = "|".join(modification)
+
+    modify_file_new_info("./car_test.txt", car_idx, False, modification)
 
 modify_car_details()
 

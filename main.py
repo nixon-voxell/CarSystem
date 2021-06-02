@@ -57,7 +57,7 @@ def get_user_selection(prompt_msg:str, selections:list, error_msg:str="Input is 
   return usr_input
 
 # forcefully get integer input within a range from user
-def get_user_int_range(prompt_msg:str, range_min:int, range_max:int, exceed_range_error_msg:str="Input has exceed the range given\n") -> int:
+def get_user_int_range(prompt_msg:str, range_min:int, range_max:int, exceed_range_error_msg:str="Input has exceed the range given!\n") -> int:
   """
   get user int and only accept a range of int, anything outside the range will be rejected
 
@@ -157,6 +157,7 @@ def login(usernames:list, passwords:list) -> int:
   """
   login a user and return the index of the user
   """
+  print("Please log in.\n")
   username = ""
   username_idx = 0
   while username not in usernames:
@@ -213,13 +214,59 @@ def add_cars(filename:str="./cars.txt") -> None:
   file = open(filename, "a", encoding="utf-8")
   file.write(f"{car_detail}\n{hourly_price}|{daily_price}\n")
 
+# modify car details
 def modify_car_details():
-  pass
+  cars, prices = get_file_info(CARS_FILE)
+  car_details = []
+  price_details = []
+  for i in range(len(cars)):
+    # split makes strings into list in list
+    car_details.append(cars[i].split("|"))
+    price_details.append(prices[i].split("|"))
+
+  view_cars(False)
+  car_idx = get_user_int_range("Choose a car index to edit: ", 1, len(car_details)) - 1
+
+  print("\nWhich car detail you want to modify?")
+  print("\n1. Car Detail\n2. Price Detail")
+  choose_detail = get_user_int_range("\nEnter (1/2): ", 1, 2)
+  
+  if choose_detail == 1:
+    print("\nChoose car detail to be modified:")
+    print("\n1. Brand\n2. Model\n3. Description\n4. Cars Remaining")
+    detail_idx = get_user_int_range("\nChoose car detail (1-4): ", 1, 4) - 1
+    if detail_idx != 3:
+      new_info = get_user_not_empty("\nEnter new car detail: ", "Nothing is entered\nPlease try again!\n")
+    else:
+      new_info = get_user_int("\nEnter new car remaining: ")
+
+    car_details[car_idx][detail_idx] = str(new_info)
+    modification = car_details[car_idx]
+    modification = "|".join(modification)
+
+    modify_file_info(CARS_FILE, car_idx, True, modification)
+  else:
+    print("\nWhich price detail you want to modify?")
+    print("\n1. Hourly Price\n2. Daily Price")
+    detail_idx = get_user_int_range("\nChoose price detail(1/2): ", 1, 2) - 1
+    new_info = get_user_float("\nEnter new car rent price: ")
+
+    price_details[car_idx][detail_idx] = str(new_info)
+    modification = price_details[car_idx]
+    modification = "|".join(modification)
+
+    modify_file_info(CARS_FILE, car_idx, False, modification)
 
 def display_records():
+  # cars rented out
+  # cars available for rent
+  # customer bookings
+  # customer payment for a specific time duration
   pass
 
 def search_records():
+  # customer booking
+  # customer payment
   pass
 
 # MAIN FUNCTION
@@ -236,10 +283,12 @@ def admin():
 
   usernames, passwords = get_file_info(ADMINS_FILE)
   login(usernames, passwords)
-  for i in range(len(admin_list)):
-    print(admin_list[i])
-  no = get_user_int_range("Choose option(1-5): ", 1, 5)
-  admin_func[no-1]()
+  while True:
+    for i in range(len(admin_list)):
+      print(admin_list[i])
+    no = get_user_int_range("Choose option (1-6): ", 1, 6)
+    if no == 6: return
+    admin_func[no-1]()
 # endregion ===================================
 
 # region ALL CUSTOMERS MENU ========================
@@ -248,19 +297,24 @@ def create_acc():
   register_new_user(CUSTOMERS_FILE, usernames)
   add_file_info(CUSTOMER_RENTS_FILE, "\n", "\n")
 
-def view_cars():
+def view_cars(view_available:bool=True) -> list:
   cars, price = get_file_info(CARS_FILE)
   print("\n========== Car List ==========\n")
+  available_car_indices = []
   for i in range(len(cars)):
     car_detail = cars[i].split("|")
     price_detail = price[i].split("|")
+    if view_available and int(car_detail[3]) <= 0: continue
+    available_car_indices.append(i)
     print(f"Car Index: {i+1}")
-    print(f"Cars: {car_detail[0]}, {car_detail[1]}")
+    print(f"Car: {car_detail[0]}, {car_detail[1]}")
     print(f"Description: {car_detail[2]}")
+    print(f"Cars Remaining: {car_detail[3]}")
     print(f"Hourly Price: {price_detail[0]}")
     print(f"Daily Price: {price_detail[1]}\n")
 
   input("Press enter to continue...")
+  return available_car_indices
 
 # MAIN FUNCTION
 def all_customer():
@@ -274,35 +328,128 @@ def all_customer():
   while True:
     for i in range(len(customer_list)):
       print(customer_list[i])
-    no = get_user_int_range("Choose option(1-3): ", 1, 3)
+    no = get_user_int_range("Choose option (1-3): ", 1, 3)
     if no == 3: return
     customer_func[no-1]()
 # endregion ===================================
 
 # region REGISTERED CUSTOMER MENU =============
 def modify_personal_details(curr_user_idx:int) -> None:
-  print("\n1. Username\n2. Password\n")
-  selection = get_user_int_range("Choose which detail do you want to modify: ", 1, 2, "Select 1 or 2 only!\n")
+  print("\n1. Username\n2. Password\n3. Cancel")
+  selection = get_user_int_range("Choose option (1-3): ", 1, 3, "Select 1 or 2 only!\n")
+  if selection == 3: return
 
   if selection == 1:
-    new_username = get_user_not_empty("New Username: ")
+    new_username = get_user_not_empty("New username: ")
     modify_file_info(CUSTOMERS_FILE, curr_user_idx, True, new_username)
   else:
-    new_password = get_user_not_empty("New Password: ")
+    new_password = get_user_not_empty("New password: ")
     modify_file_info(CUSTOMERS_FILE, curr_user_idx, False, new_password)
 
 def view_history(curr_user_idx:int) -> None:
-  pass
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
 
 def view_rented_cars(curr_user_idx:int) -> None:
   pass
 
 def book_cars(curr_user_idx:int) -> None:
-  # format: car_idx,date|car_idx,date|car_idx,date
-  pass
+  # decrease cars remaning by 1 START
+  car_details, price_details = get_file_info(CARS_FILE)
+  car_details = [detail.split("|") for detail in car_details]
+  price_details = [detail.split("|") for detail in price_details]
+
+  available_car_indices = view_cars(True)
+  available_car_indices = [str(idx) for idx in available_car_indices]
+  car_idx = get_user_selection("\nSelect car index: ", available_car_indices, "Car index is not available for rent!\n")
+  car_idx = int(car_idx) - 1
+
+  car_details[car_idx][3] = str(int(car_details[car_idx][3]) - 1)
+  modify_file_info(CARS_FILE, car_idx, True, "|".join(car_details[car_idx]))
+  # decrease car remaining by 1 END
+
+  # car_indices: car_idx,duration,D/H|car_idx,duration,D/H|car_idx,duration,D/H
+  # dates      : date|date|date
+
+  # ask how long does the customer wants to rent the car START
+  print("\nDo you want to rent the car in days or hours? Select '1' for days and '2' for hours")
+  selection = get_user_int_range("\nChoose option (1/2): ", 1, 2)
+  booking_result = ""
+  if selection == 1:
+    duration = get_user_int("How many days do you want to rent the car?")
+    booking_result = f"{car_idx},{duration},D"
+  else:
+    duration = get_user_int("How many hours do you want to rent the car?")
+    booking_result = f"{car_idx},{duration},H"
+  # ask how long does the customer wants to rent the car END
+
+  # append new car index and allocate a new date in customer_rents.txt START
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+  car_indices = [idx.split("|") for idx in car_indices]
+  dates = [date.split("|") for date in dates]
+
+  car_indices[curr_user_idx].append(booking_result)
+  dates[curr_user_idx].append("-")
+
+  new_car_indices = "|".join(car_indices[curr_user_idx])
+  new_dates = "|".join(dates[curr_user_idx])
+
+  modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, True, new_car_indices)
+  modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, new_dates)
+  # append new car index and allocate a new date in customer_rents.txt END
 
 def payment(curr_user_idx:int) -> None:
-  pass
+  # check which booked cars are not payed yet START
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+  car_indices = [idx.split("|") for idx in car_indices]
+  dates = [date.split("|") for date in dates]
+
+  unpaid_car_indices = []
+  for i in range(len(car_indices[curr_user_idx])):
+    if dates[curr_user_idx][i] == "-":
+      unpaid_car_indices.append(i)
+  # check which booked cars are not payed yet END
+
+  # calculate total price START
+  car_details, price_details = get_file_info(CARS_FILE)
+  car_details = [detail.split("|") for detail in car_details]
+  price_details = [detail.split("|") for detail in price_details]
+
+  total_price = 0
+  for idx in unpaid_car_indices:
+    car_idx_details = car_indices[curr_user_idx][idx].split(",")
+    if car_idx_details[2] == "H":
+      total_price += float(price_details[int(car_idx_details[0])][0])*int(car_idx_details[1])
+    else:
+      total_price += float(price_details[int(car_idx_details[0])][1])*int(car_idx_details[1])
+
+  # calculate total price END
+
+  # print out details and show cars that the customer booked START
+  print("\nCars booked:\n")
+  for idx in unpaid_car_indices:
+    car_idx_details = car_indices[curr_user_idx][idx].split(",")
+    if car_idx_details[2] == "H":
+      print(car_details[int(car_idx_details[0])][0], car_details[int(car_idx_details[0])][1], end=" ")
+      print(f"* {car_idx_details[1]} Hours")
+    else:
+      print(car_details[int(car_idx_details[0])][0], car_details[int(car_idx_details[0])][1], end=" ")
+      print(f"* {car_idx_details[1]} Days")
+      
+  print(f"The total price is: {total_price}\n")
+  input("Press enter to pay...")
+  # print out details and show cars that the customer booked END
+
+  # replace "-" in dates with actual dates to mark it as paid START
+  # get current time
+  current_time = datetime.datetime.now().strftime("%Y,%m,%d,%H,%M,%S")
+  for idx in unpaid_car_indices:
+    dates[curr_user_idx][idx] = current_time
+  # replace "-" in dates with actual dates to mark it as paid END
+
+  # write car_indices and dates back into the file START
+  modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, "|".join(dates[curr_user_idx]))
+  # write car_indices and dates back into the file END
+
 
 def delete_account(curr_user_idx:int) -> bool:
   decision = ""
@@ -321,12 +468,12 @@ def registered_customer() -> None:
     "\n1. Modify personal details.",
     "2. View personal rental history.",
     "3. View detail of cars to be rented out. ",
-    "4. Select and Book a car for a specific duration",
+    "4. Select and book a car for a specific duration",
     "5. Do payment to confirm Booking.",
     "6. Delete account",
     "7. Exit to main menu\n"
   ]
-  registered_customer_func = [modify_personal_details, view_history, view_rented_cars, book_cars, payment]
+  registered_customer_func = [modify_personal_details, view_history, view_rented_cars, book_cars, payment, delete_account]
 
   usernames, passwords = get_file_info(CUSTOMERS_FILE)
   curr_user_idx = login(usernames, passwords)
@@ -334,7 +481,7 @@ def registered_customer() -> None:
   while in_loop:
     for i in range(len(registered_customer_list)):
       print(registered_customer_list[i])
-    no = get_user_int("Choose option(1-7): ")
+    no = get_user_int("Choose option (1-7): ")
     if no == 7: return
     in_loop = not registered_customer_func[no-1](curr_user_idx)
 # endregion ===================================
@@ -342,7 +489,7 @@ def registered_customer() -> None:
 # region MAIN PROGRAM ===================================
 def exit_program() -> None:
   print("\nDo you want to continue? To exit to the Main Menu type '1', To Terminate Program type '2': ")
-  no = get_user_int_range("Choose option(1/2): ", 1, 2)
+  no = get_user_int_range("Choose option (1/2): ", 1, 2)
   if no == 2: exit()
 
 def main() -> None:
@@ -358,7 +505,7 @@ def main() -> None:
 
   while True:
     print("\n"*10 + "Welcome to SUPER CAR RENTAL SERVICES!!!")
-    print("========== Main Menu ==========")
+    print("\n========== Main Menu ==========\n")
     for i in range(len(user_type_list)):
       print(user_type_list[i])
 
