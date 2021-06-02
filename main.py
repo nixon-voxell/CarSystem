@@ -272,6 +272,9 @@ def search_records():
   1. select customer
   2. choose booking or payment
   3. display
+
+  - == not paid, only boooked
+  date == paid
   """
   pass
 
