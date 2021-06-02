@@ -114,20 +114,24 @@ def modify_car_details():
       print("Choose car detail to be modified:")
       print("1. Brand\n","2. Model\n","3. Description\n")
       detail_idx = get_user_int("Choose car detail(1-3): ") - 1
-
-      info = get_user_not_empty("Enter car detail", "Nothing is entered\nPlease try again!")
-      info = f"|{car_details[car_idx]}+={info[detail_idx]}|"
-      modify_file_info("./car_test.txt", car_idx, True, info)
+      info = get_user_not_empty("Enter New Car Detail: ", "Nothing is entered\nPlease try again!")
+      modification = car_details[car_idx][detail_idx] = info
+      # contatenate strings with "|"
+      for car_idx in range(len(car_details)):
+        car_details[car_idx][:3] += "|"
+      modify_file_info("./car_test.txt", car_idx, True, modification)
     else:
       print("Which price detail you want to modify?")
       print("1. Hourly Price\n","2. Daily Price")
       detail_idx = get_user_int("Choose price detail(1/2): ") - 1
-      info = get_user_not_empty("Enter Car's renting price", "Nothing is entered\nPlease try again!")
-      info = price_details.append(info)
+      info = get_user_float("Enter New Car Rent Price: ")
+      modification = price_details[car_idx][detail_idx] = info
+      # contatenate strings with loop and "|"
+      for car_idx in range(len(price_details)):
+        price_details[car_idx][:2] += "|"
+      modify_file_info("./car_test.txt", car_idx, False, str(modification))
 
-      modify_file_info("./car_test.txt", car_idx, False, info)
-
-  modify_car_details()
+modify_car_details()
 
 # Car: Brand, Model
 # Description: Description
