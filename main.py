@@ -267,6 +267,12 @@ def display_records():
 def search_records():
   # customer booking
   # customer payment
+
+  """
+  1. select customer
+  2. choose booking or payment
+  3. display
+  """
   pass
 
 # MAIN FUNCTION
