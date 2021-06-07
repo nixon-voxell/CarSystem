@@ -1,3 +1,5 @@
+import datetime
+
 def get_file_info(filename:str) -> tuple:
   with open(filename, "r", encoding="utf-8") as file:
     file_content = file.read()
@@ -62,60 +64,68 @@ CUSTOMER_RENTS_FILE = "./customer_rents.txt"
 
 # search specific records
 def search_records():
-  car_details, dates = get_file_info(CUSTOMER_RENTS_FILE)
-  names, _ = get_file_info(CUSTOMERS_FILE)
-  car_list, _ = get_file_info(CARS_FILE)
-  
-  car_info = [] 
-  date_info = []
-  cars = []
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+  customer_names, _ = get_file_info(CUSTOMERS_FILE)
+  car_details, _ = get_file_info(CARS_FILE)
 
-  # customer_rents
-  for i in range(len(car_details)):
-    # split makes strings into lists in list
-    car_info.append(car_details[i].split("|"))
-    date_info.append(dates[i].split("|"))
-  
-  # cars.txt
-  for i in range(len(car_list)):
-    cars.append(car_list[i].split("|"))
-  
-  name = get_user_not_empty("Enter customer name to be searched: ", "Input cannot be empty\n")
-  while name in names:
-    print("Choose your option below:")
-    print("1. Customer booking\n2. Customer payment")
-    option = get_user_int_range("Enter option (1/2): ", 1, 2, "Input has exceed the range given!\n") 
-    
-    if option == 1:
-      # do customer booking
-      # name in names[i] == car_info[i]
-      customer_idx = names.index(name)
-      f"{name}'s index is: {customer_idx}"
-      if customer_idx >= 0:
-        print(name, "booked car detail below: ")
-      date_info[customer_idx].index("-")
-      rent_car_list = car_info[i].split("|")
-      for car in rent_car_list:
-        car_idx = car.split(",")[0]
-      for car in cars:
-        print(cars[car_idx][:2])
-      break
+  car_indices = [c.split("|") for c in car_indices]
+  dates = [d.split("|") for d in dates]
+  car_details = [c.split("|") for c in car_details]
 
-    else:
-      # do customer payment
-      # name in names[i] == car_info[i]
-      customer_idx = names.index(name)
-      f"{name}'s index is: {customer_idx}"
-      if customer_idx >= 0:
-        print(name, "paid car detail below: ")
-      date_info[customer_idx].index(not "-")
-      rent_car_list = car_info[i].split("|")
-      for car in rent_car_list:
-        car_idx = car.split(",")[0]
-      for car in cars:
-        print(cars[car_idx][:2])
-      break
+  print("")
+  for i in range(len(customer_names)):
+    print(f"{i+1}. {customer_names[i]}")
+  customer_idx = get_user_int_range(f"\nChoose a customer to be searched (1-{len(customer_names)}): ", 1, len(customer_names)) - 1
 
-  return print(name,"is not inside customers.txt\n")
+  print("\nChoose your option below:")
+  print("1. Customer booking\n2. Customer payment")
+  option = get_user_int_range("\nEnter option (1/2): ", 1, 2) 
+  
+  if option == 1:
+    # do customer booking
+    print(f"\nCars booked by: {customer_names[customer_idx]}\n")
+    # all date history in that line
+    date_details = dates[customer_idx]
+    # all index history in that line
+    indices_details = car_indices[customer_idx]
+
+    book_idx = 0
+    for history_idx in range(len(indices_details)):
+      if date_details[history_idx] == "-":
+        book_idx += 1
+        rent_idx_str = f"{book_idx}. "
+        rent_details = indices_details[history_idx].split(",")
+        rent_car_details = car_details[int(rent_details[0])]
+        print(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+  else:
+    # do customer payment
+    # name in customer_names[i] == car_info[i]
+    print(f"\nCars rent by: {customer_names[customer_idx]}\n")
+    date_details = dates[customer_idx]
+    indices_details = car_indices[customer_idx]
+
+    book_idx = 0
+    for history_idx in range(len(indices_details)):
+      if date_details[history_idx] != "-":
+        book_idx += 1
+        rent_idx_str = f"{book_idx}. "
+        rent_details = indices_details[history_idx].split(",")
+        rent_car_details = car_details[int(rent_details[0])]
+        rent_car_date = date_details[history_idx].split(",")
+        # convert all string elements from string to integer
+        rent_car_date = [int(d) for d in rent_car_date]
+        # create readable datetime format
+        rent_car_date = datetime.datetime(
+          rent_car_date[0], rent_car_date[1],
+          rent_car_date[2], rent_car_date[3],
+          rent_car_date[4], rent_car_date[5]
+        )
+        print(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+        print(" "*len(rent_idx_str) + f"Rented on: {rent_car_date}")
+        if rent_details[2] == "D":
+          print(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} day(s)")
+        else:
+          print(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} hour(s)")
 
 search_records()
