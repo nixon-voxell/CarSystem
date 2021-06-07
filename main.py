@@ -263,11 +263,6 @@ def modify_car_details():
     modify_file_info(CARS_FILE, car_idx, False, modification)
 
 def display_records():
-  # cars rented out DONE
-  # customer bookings DONE
-  # cars available for rent DONE
-  # customer payment for a specific time duration
-
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   car_indices = [idx.split("|") for idx in car_indices]
   dates = [date.split("|") for date in dates]
@@ -283,6 +278,7 @@ def display_records():
   for customer_idx in range(len(car_indices)):
     date_details = dates[customer_idx]
     indices_details = car_indices[customer_idx]
+    if len(indices_details) <= 0: continue
 
     print(f"\nCars rented by: {usernames[customer_idx]}\n")
     rent_idx = 0
@@ -292,7 +288,9 @@ def display_records():
         rent_idx_str = f"{rent_idx}. "
         rent_details = indices_details[history_idx].split(",")
         rent_car_date = date_details[history_idx].split(",")
+        # convert all string elements from string to integer
         rent_car_date = [int(d) for d in rent_car_date]
+        # create readable datetime format
         rent_car_date = datetime.datetime(
           rent_car_date[0], rent_car_date[1],
           rent_car_date[2], rent_car_date[3],
@@ -305,6 +303,7 @@ def display_records():
           print(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} day(s)")
         else:
           print(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} hour(s)")
+        print(" "*len(rent_idx_str) + f"Status: {'Returned' if int(rent_details[3]) else 'Not returned'}")
   # show rented cars END
 
   # show cars that are booked START
@@ -346,7 +345,66 @@ def search_records():
   pass
 
 def return_rented_cars():
-  pass
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+  car_indices = [idx.split("|") for idx in car_indices]
+  dates = [date.split("|") for date in dates]
+
+  car_details, price_details = get_file_info(CARS_FILE)
+  car_details = [detail.split("|") for detail in car_details]
+  price_details = [detail.split("|") for detail in price_details]
+
+  usernames, _ = get_file_info(CUSTOMERS_FILE)
+
+  print("")
+  for i in range(len(usernames)):
+    print(f"{i+1}. {usernames[i]}")
+
+  customer_idx = get_user_int_range(f"Select a customer (1-{len(usernames)}): ", 1, len(usernames)) - 1
+
+  # show unreturned cars START
+  date_details = dates[customer_idx]
+  indices_details = car_indices[customer_idx]
+  unreturned_history_indices = []
+  unreturned_car_indices = []
+  unreturned_car_dates = []
+  for history_idx in range(len(indices_details)):
+    if date_details[history_idx] != "-":
+      rent_details = indices_details[history_idx].split(",")
+      rent_car_date = date_details[history_idx].split(",")
+      # convert all string elements from string to integer
+      rent_car_date = [int(d) for d in rent_car_date]
+      # create readable datetime format
+      rent_car_date = datetime.datetime(
+        rent_car_date[0], rent_car_date[1],
+        rent_car_date[2], rent_car_date[3],
+        rent_car_date[4], rent_car_date[5]
+      )
+      if rent_details[3] != "1":
+        # store history index and rent date
+        unreturned_history_indices.append(history_idx)
+        unreturned_car_indices.append(int(rent_details[0]))
+        unreturned_car_dates.append(str(rent_car_date))
+
+  if len(unreturned_history_indices) > 0:
+    print(f"\nCars that are not returned by: {usernames[customer_idx]}")
+    for i in range(len(unreturned_car_indices)):
+      unreturned_car_detail = car_details[unreturned_car_indices[i]]
+      print(f"{i+1}. {unreturned_car_detail[0]}, {unreturned_car_detail[1]}")
+      print(" "*len(f"{i+1}. ") + f"Rented on: {unreturned_car_dates[i]}")
+
+    return_car_idx = get_user_int_range(f"Choose a car to return (1-{len(unreturned_history_indices)}): ", 1, len(unreturned_history_indices)) - 1
+    # return the car by setting the last value in rent_details to "1"
+    rent_details = indices_details[unreturned_history_indices[return_car_idx]].split(",")
+    rent_details[3] = "1"
+    indices_details[unreturned_history_indices[return_car_idx]] = ",".join(rent_details)
+
+    modify_file_info(CUSTOMER_RENTS_FILE, customer_idx, True, "|".join(indices_details))
+
+  else:
+    print(f"There are no cars to return from {usernames[customer_idx]}.")
+
+  input("Car returned, press enter to continue...")
+  # show unreturned cars END
 
 # MAIN FUNCTION
 def admin():
@@ -461,6 +519,7 @@ def view_history(curr_user_idx:int) -> None:
       rent_car_details = car_details[int(rent_details[0])]
       print(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
       print(" "*len(rent_idx_str) + f"Rented on: {rent_car_date}")
+      print(" "*len(rent_idx_str) + f"Status: {'Returned' if int(rent_details[3]) else 'Not returned'}")
 
   input("Press enter to continue...")
 
@@ -520,10 +579,10 @@ def book_cars(curr_user_idx:int) -> None:
   booking_result = ""
   if selection == 1:
     duration = get_user_int("How many days do you want to rent the car: ")
-    booking_result = f"{car_idx},{duration},D"
+    booking_result = f"{car_idx},{duration},D,0"
   else:
     duration = get_user_int("How many hours do you want to rent the car: ")
-    booking_result = f"{car_idx},{duration},H"
+    booking_result = f"{car_idx},{duration},H,0"
   # ask how long does the customer wants to rent the car END
 
   # append new car index and allocate a new date in customer_rents.txt START
