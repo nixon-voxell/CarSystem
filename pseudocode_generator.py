@@ -1,9 +1,13 @@
 import re
 
+input("1")
+input("2")
+input("3")
+
 python_file = 'main.py'
 work_file = None
 
-basic_conversion_rules = {"for": "FOR", "if": "IF", "==": "EQUALS", "while": "WHILE", "until": "UNTIL", "import": "IMPORT", "class": "DEFINE CLASS", "def": "FUNCTION", "else:": "ELSE", "elif": "ELSE IF", "except:": "EXCEPT:", "try:": "TRY:", "pass": "PASS", "in": "IN"}
+basic_conversion_rules = {"for": "FOR", "if": "IF", "while": "DOWHILE", "until": "UNTIL", "import": "IMPORT", "class": "DEFINE CLASS", "def": "FUNCTION", "else:": "ELSE", "elif": "ELSE IF", "except:": "EXCEPT:", "try:": "TRY:", "pass": "PASS", "in": "IN", "not": "NOT"}
 prefix_conversion_rules = {"#F": "CALL "}
 advanced_conversion_rules = {"print": "DISPLAY", "return": "RETURN", "input": "READ"}
 
