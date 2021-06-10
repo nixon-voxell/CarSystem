@@ -1,0 +1,1566 @@
+IMPORT datetime
+
+IMPORT os
+
+
+
+# region CONSTANTS =================================
+
+CUSTOMERS_FILE = "./customers.txt"
+
+CUSTOMER_RENTS_FILE = "./customer_rents.txt"
+
+CARS_FILE = "./cars.txt"
+
+ADMINS_FILE = "./admins.txt"
+
+# endregion ========================================
+
+
+
+# region UTILS =====================================
+
+FUNCTION join_util(join_list:list, join_str:str) -> str:
+
+  IF join_list[0] != "":
+
+    RETURN join_str.join(join_list)
+
+  ELSE RETURN join_list[1]
+
+
+
+# forcefully get integer READ from user
+
+FUNCTION get_user_int(prompt_msg:str) -> int:
+
+  usr_READ = ""
+
+  # check IF usr_READ is digit or not
+
+  WHILE not usr_READ.isdigit():
+
+    # get usr_READ from user
+
+    usr_READ = READ(prompt_msg)
+
+
+
+    # check IF usr_READ is digit or not
+
+    IF not usr_READ.isdigit():
+
+      # DISPLAY error message
+
+      DISPLAY("Input is not an integer\nPlease try again\n")
+
+
+
+  RETURN int(usr_READ)
+
+
+
+# forcefully get float READ from user
+
+FUNCTION get_user_float(prompt_msg:str) -> float:
+
+  usr_READ = ""
+
+  # check IF usr_READ is a float or not
+
+  WHILE not usr_READ.replace(".", "", 1).isdigit():
+
+    # get usr_READ from user
+
+    usr_READ = READ(prompt_msg)
+
+    # IF usr_READ is not a float, DISPLAY error msg
+
+    IF not usr_READ.replace(".", "", 1).isdigit():
+
+      DISPLAY("Input is not a number\nPlease try again\n")
+
+
+
+  RETURN float(usr_READ)
+
+
+
+# forcefully get a non-empty string from user
+
+FUNCTION get_user_not_empty(prompt_msg:str, error_msg:str="Input cannot be empty\n") -> str:
+
+  usr_READ = ""
+
+  WHILE usr_READ EQUALS "":
+
+    usr_READ = READ(prompt_msg)
+
+    IF usr_READ EQUALS "":
+
+      DISPLAY(error_msg)
+
+
+
+  RETURN usr_READ
+
+
+
+# forcefully get a string READ that is inside the given selection from user
+
+FUNCTION get_user_selection(prompt_msg:str, selections:list,
+
+  error_msg:str="Input is not within selection given\n") -> str:
+
+  usr_READ = ""
+
+  WHILE usr_READ not IN selections:
+
+    usr_READ = READ(prompt_msg)
+
+    IF usr_READ not IN selections:
+
+      DISPLAY(error_msg)
+
+
+
+  RETURN usr_READ
+
+
+
+# forcefully get integer READ within a range from user
+
+FUNCTION get_user_int_range(prompt_msg:str, range_min:int, range_max:int,
+
+  exceed_range_error_msg:str="Input has exceed the range given!\n") -> int:
+
+  """
+
+  get user int and only accept a range of int, anything outside the range will be rejected
+
+
+
+  ex: range_min: 0, range_max: 5 only accepts (0, 1, 2, 3, 4, 5)
+
+  """
+
+  usr_int = range_min - 1
+
+  WHILE usr_int < range_min or usr_int > range_max:
+
+    usr_int = get_user_int(prompt_msg)
+
+    IF usr_int < range_min or usr_int > range_max:
+
+      DISPLAY(exceed_range_error_msg)
+
+
+
+  RETURN usr_int
+
+# endregion  =======================================
+
+
+
+# region USERNAMES AND PASSWORDS ===================
+
+# get usernames and passwords from a text file
+
+FUNCTION get_file_info(filename:str) -> tuple:
+
+  with open(filename, "r", encoding="utf-8") as file:
+
+    file_content = file.read()
+
+  lines = file_content.split("\n")
+
+
+
+  content1 = []
+
+  content2 = []
+
+
+
+  # loop through the entire list lines IN the text file and exclude the last line
+
+  FOR line_idx IN range(len(lines) - 1):
+
+    # check IF line_idx is an even or odd number
+
+    IF line_idx % 2 EQUALS 0:
+
+      content1.append(lines[line_idx])
+
+    ELSE
+
+      content2.append(lines[line_idx])
+
+
+
+  RETURN content1, content2
+
+
+
+# modify file lines from a text file
+
+FUNCTION modify_file_info(filename:str, location:int, is_content1:bool, info:str) -> None:
+
+  content1, content2 = get_file_info(filename)
+
+  # edit content1[location]/content2[location] based on is_content1
+
+  IF is_content1: content1[location] = info
+
+  ELSE content2[location] = info
+
+
+
+  final_string = ""
+
+  FOR content_idx IN range(len(content1)):
+
+    # content_idx is an integer which will increase UNTIL the range ends
+
+    final_string += content1[content_idx] + "\n"
+
+    final_string += content2[content_idx] + "\n"
+
+
+
+  with open(filename, "w") as file:
+
+    file.write(final_string)
+
+
+
+# delete file lines from a text file
+
+FUNCTION delete_file_info(filename:str, location:int) -> None:
+
+  content1, content2 = get_file_info(filename)
+
+
+
+  final_string = ""
+
+  FOR content_idx IN range(len(content1)):
+
+    IF (content_idx != location):
+
+      final_string += content1[content_idx] + "\n"
+
+      final_string += content2[content_idx] + "\n"
+
+
+
+  with open(filename, "w") as file:
+
+    file.write(final_string)
+
+
+
+# add file lines to a text file
+
+FUNCTION add_file_info(filename:str, new_content1:str, new_content2:str) -> None:
+
+  with open(filename, "a") as file:
+
+    file.write(new_content1)
+
+    file.write(new_content2)
+
+
+
+# register new username and password
+
+FUNCTION register_new_user(filename:str, usernames:list) -> None:
+
+  username = ""
+
+  password = ""
+
+
+
+  WHILE username EQUALS "" or username IN usernames:
+
+    username = get_user_not_empty("Enter username: ")
+
+    IF username EQUALS "":
+
+      DISPLAY("Username cannot be empty!\n")
+
+    ELSE IF username IN usernames:
+
+      DISPLAY("Username has been taken!\nPlease enter another username.\n")
+
+
+
+  WHILE password EQUALS "":
+
+    password = get_user_not_empty("Enter password: ")
+
+    IF password EQUALS "":
+
+      DISPLAY("Password cannot be empty!\n")
+
+
+
+  DISPLAY(f"Your username and password is: {username}, {password}")
+
+
+
+  with open(filename, "a", encoding="utf-8") as customer_file:
+
+    customer_file.write(f"{username}\n{password}\n")
+
+# endregion  =======================================
+
+
+
+# region LOGIN =====================================
+
+FUNCTION login(usernames:list, passwords:list) -> int:
+
+  """
+
+  login a user and RETURN the index of the user
+
+  """
+
+  DISPLAY("Please log in.\n")
+
+  username = ""
+
+  username_idx = 0
+
+  WHILE username not IN usernames:
+
+    # get READ from user
+
+    username = get_user_not_empty("Username: ")
+
+    IF username not IN usernames:
+
+      DISPLAY("Username not found\nPlease try again\n")
+
+    ELSE
+
+      username_idx = usernames.index(username)
+
+
+
+  password = ""
+
+  # check IF password is correct corresponding to the username_idx
+
+  WHILE password != passwords[username_idx]:
+
+    # get READ from user
+
+    password = get_user_not_empty("Password: ")
+
+    IF password != passwords[username_idx]:
+
+      DISPLAY("Password incorrect\nPlease try again\n")
+
+
+
+  DISPLAY("Logged in!\n")
+
+  READ("Press enter to continue...")
+
+  os.system("cls")
+
+  RETURN username_idx
+
+# endregion ========================================
+
+
+
+# region ADMIN MENU ================================
+
+FUNCTION add_new_car() -> None:
+
+  car_details, _ = get_file_info(CARS_FILE)
+
+  car_details = [c.split("|") FOR c IN car_details]
+
+  # lower down all cases to perform name checking
+
+  used_car_names = [c[0].lower()+c[1].lower() FOR c IN car_details]
+
+
+
+  car_detail = ""
+
+  car_name = ""
+
+
+
+  brand = ""
+
+  model = ""
+
+  description = ""
+
+
+
+  WHILE car_detail EQUALS "" or car_name IN used_car_names:
+
+    brand = get_user_not_empty("Enter brand: ", "Brand cannot be empty!\n")
+
+    model = get_user_not_empty("Enter model: ", "Model cannot be empty!\n")
+
+    description = get_user_not_empty("Enter description:  ", "Description cannot be empty!\n")
+
+    amount = get_user_int("Enter amount of cars to add: ")
+
+
+
+    car_detail = f"{brand}|{model}|{description}|{amount}\n"
+
+    car_name = brand.lower() + model.lower()
+
+
+
+    IF car_name IN used_car_names:
+
+      DISPLAY("The car name has been taken!\nPlease create a unique one.\n")
+
+
+
+  hourly_price = get_user_float("Enter hourly price: ")
+
+  daily_price = get_user_float("Enter daily price: ")
+
+  price_detail = f"{hourly_price}|{daily_price}\n"
+
+
+
+  DISPLAY(f"Your car name is: {brand}, {model}")
+
+  DISPLAY(f"Your car description is: {description}")
+
+  DISPLAY(f"The hourly price is: {hourly_price}\nThe daily price is: {daily_price}")
+
+
+
+  add_file_info(CARS_FILE, car_detail, price_detail)
+
+
+
+# modify car details
+
+FUNCTION modify_car_details():
+
+  cars, prices = get_file_info(CARS_FILE)
+
+  car_details = []
+
+  price_details = []
+
+  FOR i IN range(len(cars)):
+
+    # split makes strings into list IN list
+
+    car_details.append(cars[i].split("|"))
+
+    price_details.append(prices[i].split("|"))
+
+
+
+  view_cars(False, False)
+
+  car_idx = get_user_int_range("Choose a car index to edit: ", 1, len(car_details)) - 1
+
+
+
+  DISPLAY("\nWhich car detail you want to modify?")
+
+  DISPLAY("\n1. Car Detail\n2. Price Detail")
+
+  choose_detail = get_user_int_range("\nEnter (1/2): ", 1, 2)
+
+  
+
+  IF choose_detail EQUALS 1:
+
+    DISPLAY("\nChoose car detail to be modified:")
+
+    DISPLAY("\n1. Brand\n2. Model\n3. Description\n4. Cars Remaining")
+
+    detail_idx = get_user_int_range("\nChoose car detail (1-4): ", 1, 4) - 1
+
+    IF detail_idx != 3:
+
+      new_info = get_user_not_empty("\nEnter new car detail: ", "Nothing is entered. Please try again!\n")
+
+    ELSE
+
+      new_info = get_user_int("\nEnter new car remaining: ")
+
+
+
+    car_details[car_idx][detail_idx] = str(new_info)
+
+    modification = car_details[car_idx]
+
+    modification = join_util(modification, "|")
+
+
+
+    modify_file_info(CARS_FILE, car_idx, True, modification)
+
+  ELSE
+
+    DISPLAY("\nWhich price detail you want to modify?")
+
+    DISPLAY("\n1. Hourly Price\n2. Daily Price")
+
+    detail_idx = get_user_int_range("\nChoose price detail(1/2): ", 1, 2) - 1
+
+    new_info = get_user_float("\nEnter new car rent price: ")
+
+
+
+    price_details[car_idx][detail_idx] = str(new_info)
+
+    modification = price_details[car_idx]
+
+    modification = join_util(modification, "|")
+
+
+
+    modify_file_info(CARS_FILE, car_idx, False, modification)
+
+
+
+FUNCTION display_records():
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  car_indices = [idx.split("|") FOR idx IN car_indices]
+
+  dates = [date.split("|") FOR date IN dates]
+
+
+
+  car_details, price_details = get_file_info(CARS_FILE)
+
+  car_details = [detail.split("|") FOR detail IN car_details]
+
+  price_details = [detail.split("|") FOR detail IN price_details]
+
+
+
+  usernames, _ = get_file_info(CUSTOMERS_FILE)
+
+
+
+  # show rented cars START
+
+  DISPLAY("\nRented cars:")
+
+  FOR customer_idx IN range(len(car_indices)):
+
+    date_details = dates[customer_idx]
+
+    indices_details = car_indices[customer_idx]
+
+    IF len(indices_details) <= 0: continue
+
+
+
+    DISPLAY(f"\nCars rented by: {usernames[customer_idx]}\n")
+
+    rent_idx = 0
+
+    FOR history_idx IN range(len(indices_details)):
+
+      IF date_details[history_idx] != "-":
+
+        rent_idx += 1
+
+        rent_idx_str = f"{rent_idx}. "
+
+        rent_details = indices_details[history_idx].split(",")
+
+        rent_car_date = date_details[history_idx].split(",")
+
+        # convert all string elements from string to integer
+
+        rent_car_date = [int(d) FOR d IN rent_car_date]
+
+        # create readable datetime format
+
+        rent_car_date = datetime.datetime(
+
+          rent_car_date[0], rent_car_date[1],
+
+          rent_car_date[2], rent_car_date[3],
+
+          rent_car_date[4], rent_car_date[5]
+
+        )
+
+        rent_car_details = car_details[int(rent_details[0])]
+
+        DISPLAY(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+        DISPLAY(" "*len(rent_idx_str) + f"Rented on: {rent_car_date}")
+
+        IF rent_details[2] EQUALS "D":
+
+          DISPLAY(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} day(s)")
+
+        ELSE
+
+          DISPLAY(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} hour(s)")
+
+        DISPLAY(" "*len(rent_idx_str) + f"Status: {'Returned' IF int(rent_details[3]) else 'Not RETURNed'}")
+
+  # show rented cars END
+
+
+
+  # show cars that are booked START
+
+  DISPLAY("\n" + "="*50)
+
+  DISPLAY("Booked cars:")
+
+  FOR customer_idx IN range(len(car_indices)):
+
+    date_details = dates[customer_idx]
+
+    indices_details = car_indices[customer_idx]
+
+
+
+    DISPLAY(f"\nCars booked by: {usernames[customer_idx]}\n")
+
+    rent_idx = 0
+
+    FOR history_idx IN range(len(indices_details)):
+
+      IF date_details[history_idx] EQUALS "-":
+
+        rent_idx += 1
+
+        rent_idx_str = f"{rent_idx}. "
+
+        rent_details = indices_details[history_idx].split(",")
+
+        rent_car_details = car_details[int(rent_details[0])]
+
+        DISPLAY(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+  # show cars that are booked END
+
+
+
+  # show cars available FOR rent START
+
+  DISPLAY("\n" + "="*50)
+
+  DISPLAY("Cars avaialble FOR rent:\n")
+
+  view_cars(True, True)
+
+  # show cars available FOR rent END
+
+
+
+# search specific records
+
+FUNCTION search_records():
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  customer_names, _ = get_file_info(CUSTOMERS_FILE)
+
+  car_details, _ = get_file_info(CARS_FILE)
+
+
+
+  car_indices = [c.split("|") FOR c IN car_indices]
+
+  dates = [d.split("|") FOR d IN dates]
+
+  car_details = [c.split("|") FOR c IN car_details]
+
+
+
+  DISPLAY("")
+
+  FOR i IN range(len(customer_names)):
+
+    DISPLAY(f"{i+1}. {customer_names[i]}")
+
+  customer_idx = get_user_int_range(f"\nChoose a customer to be searched (1-{len(customer_names)}): ", 1, len(customer_names)) - 1
+
+
+
+  DISPLAY("\nChoose your option below:")
+
+  DISPLAY("1. Customer booking\n2. Customer payment")
+
+  option = get_user_int_range("\nEnter option (1/2): ", 1, 2) 
+
+  
+
+  IF option EQUALS 1:
+
+    # do customer booking
+
+    DISPLAY(f"\nCars booked by: {customer_names[customer_idx]}\n")
+
+    # all date history IN that line
+
+    date_details = dates[customer_idx]
+
+    # all index history IN that line
+
+    indices_details = car_indices[customer_idx]
+
+
+
+    book_idx = 0
+
+    FOR history_idx IN range(len(indices_details)):
+
+      IF date_details[history_idx] EQUALS "-":
+
+        book_idx += 1
+
+        rent_idx_str = f"{book_idx}. "
+
+        rent_details = indices_details[history_idx].split(",")
+
+        rent_car_details = car_details[int(rent_details[0])]
+
+        DISPLAY(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+
+
+  ELSE
+
+    # do customer payment
+
+    # name IN customer_names[i] EQUALS car_info[i]
+
+    DISPLAY(f"\nCars rent by: {customer_names[customer_idx]}\n")
+
+    date_details = dates[customer_idx]
+
+    indices_details = car_indices[customer_idx]
+
+
+
+    book_idx = 0
+
+    FOR history_idx IN range(len(indices_details)):
+
+      IF date_details[history_idx] != "-":
+
+        book_idx += 1
+
+        rent_idx_str = f"{book_idx}. "
+
+        rent_details = indices_details[history_idx].split(",")
+
+        rent_car_details = car_details[int(rent_details[0])]
+
+        rent_car_date = date_details[history_idx].split(",")
+
+        # convert all string elements from string to integer
+
+        rent_car_date = [int(d) FOR d IN rent_car_date]
+
+        # create readable datetime format
+
+        rent_car_date = datetime.datetime(
+
+          rent_car_date[0], rent_car_date[1],
+
+          rent_car_date[2], rent_car_date[3],
+
+          rent_car_date[4], rent_car_date[5]
+
+        )
+
+        DISPLAY(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+        DISPLAY(" "*len(rent_idx_str) + f"Rented on: {rent_car_date}")
+
+        IF rent_details[2] EQUALS "D":
+
+          DISPLAY(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} day(s)")
+
+        ELSE
+
+          DISPLAY(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} hour(s)")
+
+
+
+FUNCTION RETURN_rented_cars():
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  car_indices = [idx.split("|") FOR idx IN car_indices]
+
+  dates = [date.split("|") FOR date IN dates]
+
+
+
+  car_details, price_details = get_file_info(CARS_FILE)
+
+  car_details = [detail.split("|") FOR detail IN car_details]
+
+  price_details = [detail.split("|") FOR detail IN price_details]
+
+
+
+  usernames, _ = get_file_info(CUSTOMERS_FILE)
+
+
+
+  DISPLAY("")
+
+  FOR i IN range(len(usernames)):
+
+    DISPLAY(f"{i+1}. {usernames[i]}")
+
+
+
+  customer_idx = get_user_int_range(f"Select a customer (1-{len(usernames)}): ", 1, len(usernames)) - 1
+
+
+
+  # show unRETURNed cars START
+
+  date_details = dates[customer_idx]
+
+  indices_details = car_indices[customer_idx]
+
+  unRETURNed_history_indices = []
+
+  unRETURNed_car_indices = []
+
+  unRETURNed_car_dates = []
+
+  FOR history_idx IN range(len(indices_details)):
+
+    IF date_details[history_idx] != "-":
+
+      rent_details = indices_details[history_idx].split(",")
+
+      rent_car_date = date_details[history_idx].split(",")
+
+      # convert all string elements from string to integer
+
+      rent_car_date = [int(d) FOR d IN rent_car_date]
+
+      # create readable datetime format
+
+      rent_car_date = datetime.datetime(
+
+        rent_car_date[0], rent_car_date[1],
+
+        rent_car_date[2], rent_car_date[3],
+
+        rent_car_date[4], rent_car_date[5]
+
+      )
+
+      IF rent_details[3] != "1":
+
+        # store history index, car index and rent date
+
+        unRETURNed_history_indices.append(history_idx)
+
+        unRETURNed_car_indices.append(int(rent_details[0]))
+
+        unRETURNed_car_dates.append(str(rent_car_date))
+
+
+
+  IF len(unRETURNed_history_indices) > 0:
+
+    DISPLAY(f"\nCars that are not RETURNed by: {usernames[customer_idx]}")
+
+    FOR i IN range(len(unRETURNed_car_indices)):
+
+      unRETURNed_car_detail = car_details[unRETURNed_car_indices[i]]
+
+      DISPLAY(f"{i+1}. {unRETURNed_car_detail[0]}, {unRETURNed_car_detail[1]}")
+
+      DISPLAY(" "*len(f"{i+1}. ") + f"Rented on: {unRETURNed_car_dates[i]}")
+
+
+
+    RETURN_car_idx = get_user_int_range(f"\nChoose a car to RETURN (1-{len(unRETURNed_history_indices)}): ", 1, len(unRETURNed_history_indices)) - 1
+
+    # RETURN the car by setting the last value IN rent_details to "1"
+
+    rent_details = indices_details[unRETURNed_history_indices[RETURN_car_idx]].split(",")
+
+    rent_details[3] = "1"
+
+    indices_details[unRETURNed_history_indices[RETURN_car_idx]] = ",".join(rent_details)
+
+
+
+    modify_file_info(CUSTOMER_RENTS_FILE, customer_idx, True, join_util(indices_details, "|"))
+
+
+
+  ELSE
+
+    DISPLAY(f"There are no cars to RETURN from {usernames[customer_idx]}.")
+
+
+
+  READ("Car RETURNed, press enter to continue...")
+
+  # show unRETURNed cars END
+
+
+
+# MAIN FUNCTION
+
+FUNCTION admin():
+
+  os.system("cls")
+
+  admin_list = [
+
+    "ADMIN",
+
+    "\n1. Add a new car.",
+
+    "2. Modify car details.",
+
+    "3. Display records",
+
+    "4. Search specific records",
+
+    "5. Return a rented car.",
+
+    "6. Return to main menu.\n"
+
+  ]
+
+  admin_func = [add_new_car, modify_car_details, display_records, search_records, RETURN_rented_cars]
+
+
+
+  usernames, passwords = get_file_info(ADMINS_FILE)
+
+  login(usernames, passwords)
+
+  WHILE True:
+
+    os.system("cls")
+
+    FOR i IN range(len(admin_list)):
+
+      DISPLAY(admin_list[i])
+
+    no = get_user_int_range("Choose option (1-6): ", 1, 6)
+
+    IF no EQUALS 6: RETURN
+
+    admin_func[no-1]()
+
+# endregion ========================================
+
+
+
+# region ALL CUSTOMERS MENU ========================
+
+FUNCTION create_acc():
+
+  usernames, _ = get_file_info(CUSTOMERS_FILE)
+
+  register_new_user(CUSTOMERS_FILE, usernames)
+
+  add_file_info(CUSTOMER_RENTS_FILE, "\n", "\n")
+
+
+
+FUNCTION view_cars(view_available:bool=True, wait=True) -> list:
+
+  cars, price = get_file_info(CARS_FILE)
+
+  available_car_indices = []
+
+  FOR i IN range(len(cars)):
+
+    car_detail = cars[i].split("|")
+
+    price_detail = price[i].split("|")
+
+    IF view_available and int(car_detail[3]) <= 0: continue
+
+    available_car_indices.append(i)
+
+    DISPLAY(f"Car Index: {i+1}")
+
+    DISPLAY(f"Car: {car_detail[0]}, {car_detail[1]}")
+
+    DISPLAY(f"Description: {car_detail[2]}")
+
+    DISPLAY(f"Cars Remaining: {car_detail[3]}")
+
+    DISPLAY(f"Hourly Price: {price_detail[0]}")
+
+    DISPLAY(f"Daily Price: {price_detail[1]}\n")
+
+
+
+  IF wait: READ("Press enter to continue...")
+
+  RETURN available_car_indices
+
+
+
+# MAIN FUNCTION
+
+FUNCTION all_customer():
+
+  os.system("cls")
+
+  customer_list = [
+
+    "ALL CUSTOMER",
+
+    "\n1. View all cars available FOR rent.",
+
+    "2. Create new account.",
+
+    "3. Exit to main menu\n"
+
+  ]
+
+  customer_func = [view_cars, create_acc]
+
+
+
+  WHILE True:
+
+    os.system("cls")
+
+    FOR i IN range(len(customer_list)):
+
+      DISPLAY(customer_list[i])
+
+    no = get_user_int_range("Choose option (1-3): ", 1, 3)
+
+    IF no EQUALS 3: RETURN
+
+    customer_func[no-1]()
+
+# endregion ========================================
+
+
+
+# region REGISTERED CUSTOMER MENU ==================
+
+FUNCTION modify_personal_details(curr_user_idx:int) -> None:
+
+  DISPLAY("\n1. Username\n2. Password\n3. Cancel")
+
+  selection = get_user_int_range("Choose option (1-3): ", 1, 3, "Select 1 or 2 only!\n")
+
+  IF selection EQUALS 3: RETURN
+
+
+
+  IF selection EQUALS 1:
+
+    new_username = get_user_not_empty("New username: ")
+
+    modify_file_info(CUSTOMERS_FILE, curr_user_idx, True, new_username)
+
+  ELSE
+
+    new_password = get_user_not_empty("New password: ")
+
+    modify_file_info(CUSTOMERS_FILE, curr_user_idx, False, new_password)
+
+
+
+FUNCTION view_history(curr_user_idx:int) -> None:
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  car_indices = [idx.split("|") FOR idx IN car_indices]
+
+  dates = [date.split("|") FOR date IN dates]
+
+
+
+  car_details, price_details = get_file_info(CARS_FILE)
+
+  car_details = [detail.split("|") FOR detail IN car_details]
+
+  price_details = [detail.split("|") FOR detail IN price_details]
+
+
+
+  DISPLAY("\nRented cars:\n")
+
+  rented_cars = []
+
+
+
+  date_details = dates[curr_user_idx]
+
+  indices_details = car_indices[curr_user_idx]
+
+
+
+  rent_idx = 0
+
+  FOR i IN range(len(date_details)):
+
+    IF date_details[i] != "-":
+
+      rent_idx += 1
+
+      rent_idx_str = f"{rent_idx}. "
+
+      rent_details = indices_details[i].split(",")
+
+      rent_car_date = date_details[i].split(",")
+
+      # convert all string elements from string to integer
+
+      rent_car_date = [int(d) FOR d IN rent_car_date]
+
+      # create readable datetime format
+
+      rent_car_date = datetime.datetime(
+
+        rent_car_date[0], rent_car_date[1],
+
+        rent_car_date[2], rent_car_date[3],
+
+        rent_car_date[4], rent_car_date[5]
+
+      )
+
+      rent_car_details = car_details[int(rent_details[0])]
+
+      DISPLAY(f"{rent_idx_str}Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+      DISPLAY(" "*len(rent_idx_str) + f"Rented on: {rent_car_date}")
+
+      DISPLAY(" "*len(rent_idx_str) + f"Status: {'Returned' IF int(rent_details[3]) else 'Not RETURNed'}")
+
+
+
+  READ("Press enter to continue...")
+
+
+
+FUNCTION view_booked_cars(curr_user_idx:int) -> None:
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  car_indices = [idx.split("|") FOR idx IN car_indices]
+
+  dates = [date.split("|") FOR date IN dates]
+
+
+
+  car_details, price_details = get_file_info(CARS_FILE)
+
+  car_details = [detail.split("|") FOR detail IN car_details]
+
+  price_details = [detail.split("|") FOR detail IN price_details]
+
+
+
+  DISPLAY("\nCars to be rented:\n")
+
+  rented_cars = []
+
+
+
+  date_details = dates[curr_user_idx]
+
+  indices_details = car_indices[curr_user_idx]
+
+
+
+  FOR i IN range(len(date_details)):
+
+    IF date_details[i] EQUALS "-":
+
+      rent_details = indices_details[i].split(",")
+
+      rent_car_details = car_details[int(rent_details[0])]
+
+      rent_car_price = price_details[int(rent_details[0])]
+
+      DISPLAY(f"Car: {rent_car_details[0]}, {rent_car_details[1]}")
+
+      DISPLAY(f"Description: {rent_car_details[2]}")
+
+      IF rent_details[2] EQUALS "H":
+
+        DISPLAY(f"Booked FOR {rent_details[1]} hours.")
+
+        total_price = float(rent_car_price[0])*int(rent_details[1])
+
+      ELSE
+
+        DISPLAY(f"Booked FOR {rent_details[1]} days.")
+
+        total_price = float(rent_car_price[1])*int(rent_details[1])
+
+      DISPLAY(f"Total Price: RM {total_price}\n")
+
+
+
+  READ("Press enter to continue...")
+
+
+
+FUNCTION book_cars(curr_user_idx:int) -> None:
+
+  # decrease cars remaning by 1 START
+
+  car_details, price_details = get_file_info(CARS_FILE)
+
+  car_details = [detail.split("|") FOR detail IN car_details]
+
+  price_details = [detail.split("|") FOR detail IN price_details]
+
+
+
+  available_car_indices = view_cars(True, False)
+
+  available_car_indices = [str(idx+1) FOR idx IN available_car_indices]
+
+  car_idx = get_user_selection("\nSelect car index: ", available_car_indices, "Car index is not available FOR rent!\n")
+
+  car_idx = int(car_idx) - 1
+
+
+
+  car_details[car_idx][3] = str(int(car_details[car_idx][3]) - 1)
+
+  modify_file_info(CARS_FILE, car_idx, True, join_util(car_details[car_idx], "|"))
+
+  # decrease car remaining by 1 END
+
+
+
+  # car_indices: car_idx,duration,D/H|car_idx,duration,D/H|car_idx,duration,D/H
+
+  # dates      THEN date|date|date
+
+
+
+  # ask how long does the customer wants to rent the car START
+
+  DISPLAY("\nDo you want to rent the car IN days or hours? Select '1' FOR days and '2' FOR hours")
+
+  selection = get_user_int_range("\nChoose option (1/2): ", 1, 2)
+
+  booking_result = ""
+
+  IF selection EQUALS 1:
+
+    duration = get_user_int("How many days do you want to rent the car: ")
+
+    booking_result = f"{car_idx},{duration},D,0"
+
+  ELSE
+
+    duration = get_user_int("How many hours do you want to rent the car: ")
+
+    booking_result = f"{car_idx},{duration},H,0"
+
+  # ask how long does the customer wants to rent the car END
+
+
+
+  # append new car index and allocate a new date IN customer_rents.txt START
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  car_indices = [idx.split("|") FOR idx IN car_indices]
+
+  dates = [date.split("|") FOR date IN dates]
+
+
+
+  car_indices[curr_user_idx].append(booking_result)
+
+  dates[curr_user_idx].append("-")
+
+
+
+  new_car_indices = join_util(car_indices[curr_user_idx], "|")
+
+  new_dates = join_util(dates[curr_user_idx], "|")
+
+
+
+  modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, True, new_car_indices)
+
+  modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, new_dates)
+
+  # append new car index and allocate a new date IN customer_rents.txt END
+
+
+
+FUNCTION payment(curr_user_idx:int) -> None:
+
+  # check which booked cars are not payed yet START
+
+  car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
+
+  car_indices = [idx.split("|") FOR idx IN car_indices]
+
+  dates = [date.split("|") FOR date IN dates]
+
+
+
+  unpaid_car_indices = []
+
+  FOR i IN range(len(car_indices[curr_user_idx])):
+
+    IF dates[curr_user_idx][i] EQUALS "-":
+
+      unpaid_car_indices.append(i)
+
+  # check which booked cars are not payed yet END
+
+
+
+  car_details, price_details = get_file_info(CARS_FILE)
+
+  car_details = [detail.split("|") FOR detail IN car_details]
+
+  price_details = [detail.split("|") FOR detail IN price_details]
+
+
+
+  # DISPLAY out details and show cars that the customer booked START
+
+  total_price = 0
+
+  DISPLAY("\nCars booked:\n")
+
+  FOR idx IN unpaid_car_indices:
+
+    rent_details = car_indices[curr_user_idx][idx].split(",")
+
+    rent_car_details = car_details[int(rent_details[0])]
+
+    rent_car_price = price_details[int(rent_details[0])]
+
+    IF rent_details[2] EQUALS "H":
+
+      rent_price= float(rent_car_price[0])*int(rent_details[1])
+
+      DISPLAY(rent_car_details[0], rent_car_details[1], end=" ")
+
+      DISPLAY(f"* {rent_details[1]} hours (RM {rent_price})")
+
+      total_price += rent_price
+
+    ELSE
+
+      rent_price = float(rent_car_price[1])*int(rent_details[1])
+
+      DISPLAY(rent_car_details[0], rent_car_details[1], end=" ")
+
+      DISPLAY(f"* {rent_details[1]} days (RM {rent_price})")
+
+      total_price += rent_price
+
+      
+
+  DISPLAY(f"The total price is: RM {total_price}\n")
+
+  # DISPLAY out details and show cars that the customer booked END
+
+
+
+  DISPLAY("Type '1' to pay, '2' to cancel payment.")
+
+  pay = get_user_int_range("Choose option (1/2): ", 1, 2)
+
+  IF pay EQUALS 1:
+
+    # replace "-" IN dates with actual dates to mark it as paid START
+
+    # get current time
+
+    current_time = datetime.datetime.now().strftime("%Y,%m,%d,%H,%M,%S")
+
+    FOR idx IN unpaid_car_indices:
+
+      dates[curr_user_idx][idx] = current_time
+
+    # replace "-" IN dates with actual dates to mark it as paid END
+
+
+
+    # write car_indices and dates back into the file START
+
+    modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, join_util(dates[curr_user_idx], "|"))
+
+    # write car_indices and dates back into the file END
+
+
+
+FUNCTION delete_account(curr_user_idx:int) -> bool:
+
+  decision = ""
+
+  decision = get_user_selection("Are you sure? y/n: ", ["y", "n"])
+
+
+
+  IF decision EQUALS "y":
+
+    delete_file_info(CUSTOMERS_FILE, curr_user_idx)
+
+    delete_file_info(CUSTOMER_RENTS_FILE, curr_user_idx)
+
+    RETURN True
+
+
+
+  RETURN False
+
+
+
+# MAIN FUNCTION
+
+FUNCTION registered_customer() -> None:
+
+  os.system("cls")
+
+  registered_customer_list = [
+
+    "REGISTERED CUSTOMER",
+
+    "\n1. Modify personal details.",
+
+    "2. View personal rental history.",
+
+    "3. View details of cars to be rented out.",
+
+    "4. Select and book a car FOR a specific duration.",
+
+    "5. Do payment to confirm Booking.",
+
+    "6. Delete account.",
+
+    "7. Exit to main menu\n"
+
+  ]
+
+  registered_customer_func = [modify_personal_details, view_history, view_booked_cars, book_cars, payment, delete_account]
+
+
+
+  usernames, passwords = get_file_info(CUSTOMERS_FILE)
+
+  curr_user_idx = login(usernames, passwords)
+
+  in_loop = True
+
+  WHILE in_loop:
+
+    os.system("cls")
+
+    FOR i IN range(len(registered_customer_list)):
+
+      DISPLAY(registered_customer_list[i])
+
+    no = get_user_int("Choose option (1-7): ")
+
+    IF no EQUALS 7: RETURN
+
+    in_loop = not registered_customer_func[no-1](curr_user_idx)
+
+# endregion ========================================
+
+
+
+# region MAIN PROGRAM ==============================
+
+FUNCTION exit_program() -> None:
+
+  DISPLAY("\nDo you want to continue? To exit to the Main Menu type '1', To Terminate Program type '2': ")
+
+  no = get_user_int_range("Choose option (1/2): ", 1, 2)
+
+  IF no EQUALS 2: exit()
+
+
+
+FUNCTION main() -> None:
+
+  user_func = [admin, all_customer, registered_customer]
+
+
+
+  user_type_list = [
+
+    "MAIN MENU",
+
+    "1. Admin",
+
+    "2. All Customers (Registered / Not-Registered)",
+
+    "3. Registered Customer",
+
+    "4. Exit Program\n"
+
+  ]
+
+
+
+  WHILE True:
+
+    os.system("cls")
+
+    DISPLAY("Welcome to SUPER CAR RENTAL SERVICES!!!\n")
+
+    FOR i IN range(len(user_type_list)):
+
+      DISPLAY(user_type_list[i])
+
+
+
+    no = get_user_int_range("Choose user(1-4): ", 1, 4)
+
+    IF no EQUALS 4: exit_program()
+
+    ELSE user_func[no-1]()
+
+# endregion ========================================
+
+
+
+IF __name__ EQUALS "__main__":
+
+  # make sure that this is the sript that we are running
+
+  # this will not run IF this script is imported instead of running directly
+
+  main()
+
+
+

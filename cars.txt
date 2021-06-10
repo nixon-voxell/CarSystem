@@ -1,10 +1,12 @@
-Nissan|Almera|City drives, running errands, road trips on a budget, and going meetings in town.|2
+Nissan|Almera|City drives, running errands, road trips on a budget, and going meetings in town.|1
 5.9|59.0
-Renault|Captur|Interstate business trips, wooing your date, and stylish weekend getaways.|2
+Renault|Captur|Interstate business trips, wooing your date, and stylish weekend getaways.|1
 11.9|119.0
 Nissan|Teana|Impressing business partners, outstation golf trips, and picking up your VIPs from the airport.|1
 24.9|249.0
 Nissan|Serena S-Hybrid|Long drives out of the city while reducing carbon footprint.|-2
 26.9|269.0
-Toyota|Camry|Good for traveling and business trip.|1
+Toyota|Camry|Good for traveling and business trip.|0
 30.0|315.0
+Nixon|Cheng|123|10
+20.0|200.0

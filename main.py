@@ -9,6 +9,11 @@ ADMINS_FILE = "./admins.txt"
 # endregion ========================================
 
 # region UTILS =====================================
+def join_util(join_list:list, join_str:str) -> str:
+  if join_list[0] != "":
+    return join_str.join(join_list)
+  else: return join_list[1]
+
 # forcefully get integer input from user
 def get_user_int(prompt_msg:str) -> int:
   usr_input = ""
@@ -48,7 +53,8 @@ def get_user_not_empty(prompt_msg:str, error_msg:str="Input cannot be empty\n") 
   return usr_input
 
 # forcefully get a string input that is inside the given selection from user
-def get_user_selection(prompt_msg:str, selections:list, error_msg:str="Input is not within selection given\n") -> str:
+def get_user_selection(prompt_msg:str, selections:list,
+  error_msg:str="Input is not within selection given\n") -> str:
   usr_input = ""
   while usr_input not in selections:
     usr_input = input(prompt_msg)
@@ -58,7 +64,8 @@ def get_user_selection(prompt_msg:str, selections:list, error_msg:str="Input is 
   return usr_input
 
 # forcefully get integer input within a range from user
-def get_user_int_range(prompt_msg:str, range_min:int, range_max:int, exceed_range_error_msg:str="Input has exceed the range given!\n") -> int:
+def get_user_int_range(prompt_msg:str, range_min:int, range_max:int,
+  exceed_range_error_msg:str="Input has exceed the range given!\n") -> int:
   """
   get user int and only accept a range of int, anything outside the range will be rejected
 
@@ -119,13 +126,11 @@ def delete_file_info(filename:str, location:int) -> None:
       final_string += content1[content_idx] + "\n"
       final_string += content2[content_idx] + "\n"
 
-  # use with to auto close, followed by as file
   with open(filename, "w") as file:
     file.write(final_string)
 
 # add file lines to a text file
 def add_file_info(filename:str, new_content1:str, new_content2:str) -> None:
-  # use with to auto close, followed by as file
   with open(filename, "a") as file:
     file.write(new_content1)
     file.write(new_content2)
@@ -136,14 +141,14 @@ def register_new_user(filename:str, usernames:list) -> None:
   password = ""
 
   while username == "" or username in usernames:
-    username = input("Enter username: ")
+    username = get_user_not_empty("Enter username: ")
     if username == "":
       print("Username cannot be empty!\n")
     elif username in usernames:
       print("Username has been taken!\nPlease enter another username.\n")
 
   while password == "":
-    password = input("Enter password: ")
+    password = get_user_not_empty("Enter password: ")
     if password == "":
       print("Password cannot be empty!\n")
 
@@ -163,7 +168,7 @@ def login(usernames:list, passwords:list) -> int:
   username_idx = 0
   while username not in usernames:
     # get input from user
-    username = input("Username: ")
+    username = get_user_not_empty("Username: ")
     if username not in usernames:
       print("Username not found\nPlease try again\n")
     else:
@@ -173,7 +178,7 @@ def login(usernames:list, passwords:list) -> int:
   # check if password is correct corresponding to the username_idx
   while password != passwords[username_idx]:
     # get input from user
-    password = input("Password: ")
+    password = get_user_not_empty("Password: ")
     if password != passwords[username_idx]:
       print("Password incorrect\nPlease try again\n")
 
@@ -184,8 +189,8 @@ def login(usernames:list, passwords:list) -> int:
 # endregion ========================================
 
 # region ADMIN MENU ================================
-def add_new_car(filename:str="./cars.txt") -> None:
-  car_details, _ = get_file_info(filename)
+def add_new_car() -> None:
+  car_details, _ = get_file_info(CARS_FILE)
   car_details = [c.split("|") for c in car_details]
   # lower down all cases to perform name checking
   used_car_names = [c[0].lower()+c[1].lower() for c in car_details]
@@ -203,7 +208,7 @@ def add_new_car(filename:str="./cars.txt") -> None:
     description = get_user_not_empty("Enter description:  ", "Description cannot be empty!\n")
     amount = get_user_int("Enter amount of cars to add: ")
 
-    car_detail = f"{brand}|{model}|{description}|{amount}"
+    car_detail = f"{brand}|{model}|{description}|{amount}\n"
     car_name = brand.lower() + model.lower()
 
     if car_name in used_car_names:
@@ -211,13 +216,13 @@ def add_new_car(filename:str="./cars.txt") -> None:
 
   hourly_price = get_user_float("Enter hourly price: ")
   daily_price = get_user_float("Enter daily price: ")
+  price_detail = f"{hourly_price}|{daily_price}\n"
 
   print(f"Your car name is: {brand}, {model}")
   print(f"Your car description is: {description}")
   print(f"The hourly price is: {hourly_price}\nThe daily price is: {daily_price}")
 
-  file = open(filename, "a", encoding="utf-8")
-  file.write(f"{car_detail}\n{hourly_price}|{daily_price}\n")
+  add_file_info(CARS_FILE, car_detail, price_detail)
 
 # modify car details
 def modify_car_details():
@@ -247,7 +252,7 @@ def modify_car_details():
 
     car_details[car_idx][detail_idx] = str(new_info)
     modification = car_details[car_idx]
-    modification = "|".join(modification)
+    modification = join_util(modification, "|")
 
     modify_file_info(CARS_FILE, car_idx, True, modification)
   else:
@@ -258,7 +263,7 @@ def modify_car_details():
 
     price_details[car_idx][detail_idx] = str(new_info)
     modification = price_details[car_idx]
-    modification = "|".join(modification)
+    modification = join_util(modification, "|")
 
     modify_file_info(CARS_FILE, car_idx, False, modification)
 
@@ -326,7 +331,7 @@ def display_records():
 
   # show cars available for rent START
   print("\n" + "="*50)
-  print("Cars avaialble for rent:\n")
+  print("Cars available for rent:\n")
   view_cars(True, True)
   # show cars available for rent END
 
@@ -448,9 +453,9 @@ def return_rented_cars():
     # return the car by setting the last value in rent_details to "1"
     rent_details = indices_details[unreturned_history_indices[return_car_idx]].split(",")
     rent_details[3] = "1"
-    indices_details[unreturned_history_indices[return_car_idx]] = ",".join(rent_details)
+    indices_details[unreturned_history_indices[return_car_idx]] = join_util(rent_details, ",")
 
-    modify_file_info(CUSTOMER_RENTS_FILE, customer_idx, True, "|".join(indices_details))
+    modify_file_info(CUSTOMER_RENTS_FILE, customer_idx, True, join_util(indices_details, "|"))
 
   else:
     print(f"There are no cars to return from {usernames[customer_idx]}.")
@@ -621,7 +626,7 @@ def book_cars(curr_user_idx:int) -> None:
   car_idx = int(car_idx) - 1
 
   car_details[car_idx][3] = str(int(car_details[car_idx][3]) - 1)
-  modify_file_info(CARS_FILE, car_idx, True, "|".join(car_details[car_idx]))
+  modify_file_info(CARS_FILE, car_idx, True, join_util(car_details[car_idx], "|"))
   # decrease car remaining by 1 END
 
   # car_indices: car_idx,duration,D/H|car_idx,duration,D/H|car_idx,duration,D/H
@@ -647,8 +652,8 @@ def book_cars(curr_user_idx:int) -> None:
   car_indices[curr_user_idx].append(booking_result)
   dates[curr_user_idx].append("-")
 
-  new_car_indices = "|".join(car_indices[curr_user_idx])
-  new_dates = "|".join(dates[curr_user_idx])
+  new_car_indices = join_util(car_indices[curr_user_idx], "|")
+  new_dates = join_util(dates[curr_user_idx], "|")
 
   modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, True, new_car_indices)
   modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, new_dates)
@@ -702,7 +707,7 @@ def payment(curr_user_idx:int) -> None:
     # replace "-" in dates with actual dates to mark it as paid END
 
     # write car_indices and dates back into the file START
-    modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, "|".join(dates[curr_user_idx]))
+    modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, join_util(dates[curr_user_idx], "|"))
     # write car_indices and dates back into the file END
 
 def delete_account(curr_user_idx:int) -> bool:
@@ -771,8 +776,5 @@ def main() -> None:
     else: user_func[no-1]()
 # endregion ========================================
 
-if __name__ == "__main__":
-  # make sure that this is the sript that we are running
-  # this will not run if this script is imported instead of running directly
-  main()
+main()
 
