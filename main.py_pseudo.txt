@@ -1,7 +1,7 @@
 FUNCTION join_util(join_list, join_str)
 BEGIN
   IF join_list[0] != "" THEN
-    RETURN join_str.join(join_list)
+    RETURN JOIN join_list with join_str
   ELSE
     RETURN join_list[1]
   ENDIF
@@ -10,10 +10,10 @@ END
 FUNCTION get_user_int(prompt_msg)
 BEGIN
   usr_input = ""
-  DOWHILE NOT usr_input.isdigit()
+  DOWHILE NOT usr_input IS DIGIT
     DISPLAY prompt_msg
     READ usr_input
-    IF NOT usr_input.isdigit() THEN
+    IF NOT usr_input IS DIGIT THEN
       DISPLAY "Input is NOT an integer\nPlease try again\n"
     ENDIF
   ENDWHILE
@@ -23,10 +23,10 @@ END
 FUNCTION get_user_float(prompt_msg)
 BEGIN
   usr_input = ""
-  DOWHILE NOT usr_input.replace(".", "", 1).isdigit()
+  DOWHILE NOT REPLACE FIRST "." WITH "" IN usr_input IS DIGIT
     DISPLAY prompt_msg
     READ usr_input
-    IF NOT usr_input.replace(".", "", 1).isdigit() THEN
+    IF NOT REPLACE FIRST "." WITH "" IN usr_input IS DIGIT THEN
       DISPLAY "Input is not a number\nPlease try again\n"
     ENDIF
   ENDWHILE
@@ -73,18 +73,17 @@ END
 
 FUNCTION get_file_info(filename) 
 BEGIN
-  WITH open(filename, "r", encoding="utf-8") AS file
-    file_content = file.read()
-  lines = file_content.split("\n")
+  READ file_content from filename
+  lines = SPLIT file_content BY "\n"
 
   content1 = []
   content2 = []
 
   LOOP line_idx FROM 0 TO len(lines) - 1
     IF line_idx % 2 == 0 THEN
-      content1.append(lines[line_idx])
+      APPEND lines[line_idx] INTO content1 
     ELSE
-      content2.append(lines[line_idx])
+      APPEND lines[line_idx] INTO content2 
     ENDIF
   ENDLOOP
   RETURN content1, content2
@@ -104,8 +103,7 @@ BEGIN
     final_string += content2[content_idx] + "\n"
   ENDLOOP
 
-  WITH open(filename, "w") AS file
-    file.write(final_string)
+  WRITE final_string INTO filename
 END
 
 FUNCTION delete_file_info(filename, location)
@@ -115,22 +113,19 @@ BEGIN
   final_string = ""
 
   LOOP content_idx FROM 0 TO len(content1)
-
     IF (content_idx != location) THEN
       final_string += content1[content_idx] + "\n"
       final_string += content2[content_idx] + "\n"
     ENDIF
   ENDLOOP
 
-  WITH open(filename, "w") AS file
-    file.write(final_string)
+  WRITE final_string INTO filename
 END
 
 FUNCTION add_file_info(filename, new_content1, new_content2)
 BEGIN
-  WITH open(filename, "a") AS file
-    file.write(new_content1)
-    file.write(new_content2)
+  APPEND new_content1 INTO filename
+  APPEND new_content2 INTO filename
 END
 
 FUNCTION register_new_user(filename, usernames:list)
@@ -155,9 +150,8 @@ BEGIN
   ENDWHILE
 
   DISPLAY "Your username and password is ", username, + "," , password
-
-  WITH open(filename, "a", encoding="utf-8") AS customer_file
-    customer_file.write(username + "\n" + password + "\n")
+  
+  APPEND (username + "\n" + password + "\n") INTO filename
 END
 
 FUNCTION login(usernames, passwords)
@@ -172,7 +166,7 @@ BEGIN
     IF username NOT IN usernames THEN
       DISPLAY "Username NOT found\nPlease try again\n"
     ELSE
-      username_idx = usernames.index(username)
+      username_idx = INDEX username FROM usernames
     ENDIF
   ENDWHILE
 
@@ -197,8 +191,8 @@ BEGIN
   car_details, _ = get_file_info(CARS_FILE)
 
   comp
-  car_details = [c.split("|") FOR c IN car_details]
-  used_car_names = [c[0].lower()+c[1].lower() FOR c IN car_details]
+  car_details = [SPLIT c BY "|" FOR c IN car_details]
+  used_car_names = [LOWERCASE c[0]+LOWERCASE c[1] FOR c IN car_details]
 
   car_detail = ""
   car_name = ""
@@ -215,7 +209,7 @@ BEGIN
     amount = get_user_int("Enter amount of cars to add: ")
 
     car_detail = brand + "|" + model + "|" + description + "|" + amount + "\n"
-    car_name = brand.lower() + model.lower()
+    car_name = LOWERCASE brand + LOWERCASE model
 
     IF car_name IN used_car_names THEN
       DISPLAY "The car name has been taken!\nPlease create a unique one.\n"
@@ -241,8 +235,8 @@ BEGIN
   price_details = []
 
   LOOP i FROM 0 TO len(cars)
-    car_details.append(cars[i].split("|"))
-    price_details.append(prices[i].split("|"))
+     APPEND (SPLIT cars[i] BY "|") INTO car_details
+     APPEND (SPLIT prices[i] BY "|") INTO price_details
   ENDLOOP
 
   view_cars(False, False)
@@ -288,13 +282,13 @@ FUNCTION display_records()
 BEGIN
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   comp
-  car_indices = [idx.split("|") FOR idx IN car_indices]
-  dates = [date.split("|") FOR date IN dates]
+  car_indices = [SPLIT idx BY "|" FOR idx IN car_indices]
+  dates = [SPLIT date by "|" FOR date IN dates]
 
   car_details, price_details = get_file_info(CARS_FILE)
   comp
-  car_details = [detail.split("|") FOR detail IN car_details]
-  price_details = [detail.split("|") FOR detail IN price_details]
+  car_details = [SPLIT detail BY "|" FOR detail IN car_details]
+  price_details = [SPLIT detail BY "|" FOR detail IN price_details]
 
   usernames, _ = get_file_info(CUSTOMERS_FILE)
 
@@ -313,8 +307,8 @@ BEGIN
       IF date_details[history_idx] != "-" THEN
         rent_idx += 1
         rent_idx_str = rent_idx + "."
-        rent_details = indices_details[history_idx].split(",")
-        rent_car_date = date_details[history_idx].split(",")
+        rent_details = SPLIT indices_details[history_idx] BY ","
+        rent_car_date = SPLIT date_details[history_idx] BY ","
         comp
         rent_car_date = [int(d) FOR d IN rent_car_date]
 
@@ -326,7 +320,7 @@ BEGIN
         )
         rent_car_details = car_details[int(rent_details[0])]
         DISPLAY rent_idx_str + "Car:" , rent_car_details[0], rent_car_details[1]
-        DISPLAY " "*len(rent_idx_str) + "Rented on:", rent_car_date
+        DISPLAY "Rented on:", rent_car_date
         IF rent_details[2] == "D" then
           DISPLAY "Rented for: ", rent_details[1], "day(s)"
         ELSE
@@ -353,7 +347,7 @@ BEGIN
       IF date_details[history_idx] == "-" THEN
         rent_idx += 1
         rent_idx_str = rent_idx + ". "
-        rent_details = indices_details[history_idx].split(",")
+        rent_details = SPLIT indices_details[history_idx] BY ","
         rent_car_details = car_details[int(rent_details[0])]
         DISPLAY rent_idx_str + "Car: ", rent_car_details[0], rent_car_details[1]
       ENDIF
@@ -370,12 +364,12 @@ BEGIN
   car_details, _ = get_file_info(CARS_FILE)
 
   comp
-  car_indices = [c.split("|") FOR c IN car_indices]
-  dates = [d.split("|") FOR d IN dates]
-  car_details = [c.split("|") FOR c IN car_details]
+  car_indices = [c SPLIT c BY "|" FOR c IN car_indices]
+  dates = [SPLIT d BY "|" FOR d IN dates]
+  car_details = [SPLIT c BY "|" FOR c IN car_details]
 
   LOOP i FROM 0 TO len(customer_names)
-    DISPLAY i+1 + "." customer_names[i]
+    DISPLAY i+1, customer_names[i]
   ENDLOOP
   customer_idx = get_user_int_range(f"\nChoose a customer to be searched (1-{len(customer_names)}): ", 1, len(customer_names)) - 1
 
@@ -393,7 +387,7 @@ BEGIN
       IF date_details[history_idx] == "-" THEN
         book_idx += 1
         rent_idx_str = book_idx + ". "
-        rent_details = indices_details[history_idx].split(",")
+        rent_details = SPLIT indices_details[history_idx] BY ","
         rent_car_details = car_details[int(rent_details[0])]
         DISPLAY rent_idx_str + "Car: ", rent_car_details[0], rent_car_details[1]
       ENDIF
@@ -408,9 +402,9 @@ BEGIN
       IF date_details[history_idx] != "-" THEN
         book_idx += 1
         rent_idx_str = book_idx + ". "
-        rent_details = indices_details[history_idx].split(",")
+        rent_details = SPLIT indices_details[history_idx] BY ","
         rent_car_details = car_details[int(rent_details[0])]
-        rent_car_date = date_details[history_idx].split(",")
+        rent_car_date = SPLIT date_details[history_idx] BY ","
         comp
         rent_car_date = [int(d) FOR d IN rent_car_date]
 
@@ -422,9 +416,9 @@ BEGIN
         DISPLAY rent_idx_str + "Car: ", rent_car_details[0], rent_car_details[1]
         DISPLAY rent_idx_str + "Rented on: ", rent_car_date
         IF rent_details[2] == "D" THEN
-          DISPLAY " "*len(rent_idx_str) + "Rented for: ", rent_details[1], "day(s)"
+          DISPLAY "Rented for: ", rent_details[1], "day(s)"
         ELSE
-          DISPLAY " "*len(rent_idx_str) + "Rented for: ", rent_details[1], "hour(s)"
+          DISPLAY "Rented for: ", rent_details[1], "hour(s)"
         ENDIF
       ENDIF
     ENDLOOP
@@ -435,18 +429,18 @@ FUNCTION return_rented_cars()
 BEGIN
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   comp
-  car_indices = [idx.split("|") FOR idx IN car_indices]
-  dates = [date.split("|") FOR date IN dates]
+  car_indices = [SPLIT idx BY "|" FOR idx IN car_indices]
+  dates = [SPLIT date BY "|" FOR date IN dates]
 
   car_details, price_details = get_file_info(CARS_FILE)
   comp
-  car_details = [detail.split("|") FOR detail IN car_details]
-  price_details = [detail.split("|") FOR detail IN price_details]
+  car_details = [SPLIT detail BY "|" FOR detail IN car_details]
+  price_details = [ SPLIT detail BY "|" FOR detail IN price_details]
 
   usernames, _ = get_file_info(CUSTOMERS_FILE)
 
   LOOP i FROM 0 TO len(usernames)
-    DISPLAY i+1 + ". " + usernames[i]
+    DISPLAY i+1, usernames[i]
   ENDLOOP
 
   customer_idx = get_user_int_range("Select a customer (1-" + len(usernames), 1, len(usernames)) - 1
@@ -458,8 +452,8 @@ BEGIN
   unreturned_car_dates = []
   LOOP history_idx FROM 0 TO len(indices_details)
     IF date_details[history_idx] != "-" THEN
-      rent_details = indices_details[history_idx].split(",")
-      rent_car_date = date_details[history_idx].split(",")
+      rent_details = SPLIT indices_details[history_idx] BY ","
+      rent_car_date = SPLIT date_details[history_idx] BY ","
       comp
       rent_car_date = [int(d) FOR d IN rent_car_date]
 
@@ -469,9 +463,9 @@ BEGIN
         rent_car_date[4], rent_car_date[5]
       )
       IF rent_details[3] != "1" THEN
-        unreturned_history_indices.append(history_idx)
-        unreturned_car_indices.append(int(rent_details[0]))
-        unreturned_car_dates.append(str(rent_car_date))
+        APPEND history_idx INTO unreturned_history_indices 
+        APPEND (int(rent_details[0])) INTO unreturned_car_indices 
+        APPEND (str(rent_car_date)) INTO unreturned_car_dates 
       ENDIF
     ENDIF
   ENDLOOP
@@ -480,10 +474,10 @@ BEGIN
     LOOP i FROM 0 TO len(unreturned_car_indices)
       unreturned_car_detail = car_details[unreturned_car_indices[i]]
       DISPLAY i+1, unreturned_car_detail[0], unreturned_car_detail[1]
-      DISPLAY " "*len{i+1}, "Rented on: ", unreturned_car_dates[i]
+      DISPLAY "Rented on: ", unreturned_car_dates[i]
     ENDLOOP
     return_car_idx = get_user_int_range(f"\nChoose a car to return (1-{len(unreturned_history_indices)}): ", 1, len(unreturned_history_indices)) - 1
-    rent_details = indices_details[unreturned_history_indices[return_car_idx]].split(",")
+    rent_details = SPLIT indices_details[unreturned_history_indices[return_car_idx]] BY ","
     rent_details[3] = "1"
     indices_details[unreturned_history_indices[return_car_idx]] = join_util(rent_details, ",")
 
@@ -535,11 +529,11 @@ BEGIN
   cars, price = get_file_info(CARS_FILE)
   available_car_indices = []
   LOOP i FROM 0 TO len(cars)
-    car_detail = cars[i].split("|")
-    price_detail = price[i].split("|")
+    car_detail = cars[i] SPLIT("|")
+    price_detail = price[i] SPLIT("|")
     IF view_available and int(car_detail[3]) <= 0 THEN continue
     ENDIF
-    available_car_indices.append(i)
+    APPEND (i) INTO available_car_indices 
     DISPLAY "Car Index: ", i+1
     DISPLAY "Car: ", car_detail[0], car_detail[1]
     DISPLAY "Description: ", car_detail[2]
@@ -597,13 +591,13 @@ FUNCTION view_history(curr_user_idx)
 BEGIN
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   comp
-  car_indices = [idx.split("|") FOR idx IN car_indices]
-  dates = [date.split("|") FOR date IN dates]
+  car_indices = [idx SPLIT("|") FOR idx IN car_indices]
+  dates = [date SPLIT("|") FOR date IN dates]
 
   car_details, price_details = get_file_info(CARS_FILE)
   comp
-  car_details = [detail.split("|") FOR detail IN car_details]
-  price_details = [detail.split("|") FOR detail IN price_details]
+  car_details = [detail SPLIT("|") FOR detail IN car_details]
+  price_details = [detail SPLIT("|") FOR detail IN price_details]
 
   DISPLAY "\nRented cars:\n"
   rented_cars = []
@@ -615,9 +609,9 @@ BEGIN
   loop i FROM 0 TO len(date_details)
     IF date_details[i] != "-" THEN
       rent_idx += 1
-      rent_idx_str = {rent_idx} 
-      rent_details = indices_details[i].split(",")
-      rent_car_date = date_details[i].split(",")
+      rent_idx_str = rent_idx + ". "
+      rent_details = SPLIT indices_details[i] BY ","
+      rent_car_date = SPLIT date_details[i] BY ","
       comp
       rent_car_date = [int(d) FOR d IN rent_car_date]
 
@@ -628,8 +622,12 @@ BEGIN
       )
       rent_car_details = car_details[int(rent_details[0])]
       DISPLAY rent_idx_str + "Car: ", rent_car_details[0] + ",", rent_car_details[1]
-      DISPLAY " "*len(rent_idx_str) + "Rented on: ", rent_car_date
-      DISPLAY " "*len(rent_idx_str) + "Status: ", 'Returned' IF int(rent_details[3]) else 'Not returned'
+      DISPLAY "Rented on: ", rent_car_date
+      IF int(rent_details[3]) == 1 THEN
+        DISPLAY "Status: Returned"
+      ELSE
+        DISPLAY "Status: Not returned"
+      ENDIF
     ENDIF
   ENDLOOP
   input "Press enter to continue..."
@@ -640,13 +638,13 @@ FUNCTION view_booked_cars(curr_user_idx)
 BEGIN
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   comp
-  car_indices = [idx.split("|") FOR idx IN car_indices]
-  dates = [date.split("|") FOR date IN dates]
+  car_indices = [SPLIT idx BY "|" FOR idx IN car_indices]
+  dates = [SPLIT date BY "|" FOR date IN dates]
 
   car_details, price_details = get_file_info(CARS_FILE)
   comp
-  car_details = [detail.split("|") FOR detail IN car_details]
-  price_details = [detail.split("|") FOR detail IN price_details]
+  car_details = [SPLIT detail BY "|" FOR detail IN car_details]
+  price_details = [SPLIT detail BY "|" FOR detail IN price_details]
 
 
 
@@ -658,7 +656,7 @@ BEGIN
 
   LOOP i FROM 0 TO len(date_details)
     IF date_details[i] == "-" THEN
-      rent_details = indices_details[i].split(",")
+      rent_details = SPLIT indices_details[i] BY ","
       rent_car_details = car_details[int(rent_details[0])]
       rent_car_price = price_details[int(rent_details[0])]
       DISPLAY "Car: ", rent_car_details[0], rent_car_details[1]
@@ -681,8 +679,8 @@ FUNCTION book_cars(curr_user_idx)
 BEGIN
   car_details, price_details = get_file_info(CARS_FILE)
   comp
-  car_details = [detail.split("|") FOR detail IN car_details]
-  price_details = [detail.split("|") FOR detail IN price_details]
+  car_details = [SPLIT detail BY "|" FOR detail IN car_details]
+  price_details = [SPLIT detail BY "|" FOR detail IN price_details]
 
   available_car_indices = view_cars(True, False)
   comp
@@ -706,11 +704,11 @@ BEGIN
 
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   comp
-  car_indices = [idx.split("|") FOR idx IN car_indices]
-  dates = [date.split("|") FOR date IN dates]
+  car_indices = [SPLIT idx BY "|" FOR idx IN car_indices]
+  dates = [SPLIT date BY "|" FOR date IN dates]
 
-  car_indices[curr_user_idx].append(booking_result)
-  dates[curr_user_idx].append("-")
+  APPEND booking_result INTO car_indices[curr_user_idx]
+  APPEND "-" INTO dates[curr_user_idx]
 
   new_car_indices = join_util(car_indices[curr_user_idx], "|")
   new_dates = join_util(dates[curr_user_idx], "|")
@@ -723,24 +721,24 @@ FUNCTION payment(curr_user_idx)
 BEGIN
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   comp
-  car_indices = [idx.split("|") FOR idx IN car_indices]
-  dates = [date.split("|") FOR date IN dates]
+  car_indices = [SPLIT idx BY "|" FOR idx IN car_indices]
+  dates = [SPLIT date BY "|" FOR date IN dates]
 
   unpaid_car_indices = []
   LOOP i FROM 0 TO len(car_indices[curr_user_idx])
     IF dates[curr_user_idx][i] == "-" THEN
-      unpaid_car_indices.append(i)
+      APPEND i INTO unpaid_car_indices 
     ENDIF
   ENDLOOP
   car_details, price_details = get_file_info(CARS_FILE)
   comp
-  car_details = [detail.split("|") FOR detail IN car_details]
-  price_details = [detail.split("|") FOR detail IN price_details]
+  car_details = [SPLIT detail BY "|" FOR detail IN car_details]
+  price_details = [SPLIT detail BY "|" FOR detail IN price_details]
 
   total_price = 0
   DISPLAY "\nCars booked:\n"
   LOOP idx FROM 0 TO unpaid_car_indices
-    rent_details = car_indices[curr_user_idx][idx].split(",")
+    rent_details = SPLIT car_indices[curr_user_idx][idx] BY ","
     rent_car_details = car_details[int(rent_details[0])]
     rent_car_price = price_details[int(rent_details[0])]
     IF rent_details[2] == "H" THEN
