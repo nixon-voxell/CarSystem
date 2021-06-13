@@ -46,7 +46,7 @@ BEGIN
   RETURN usr_input
 END
 
-FUNCTION get_user_selection(prompt_msg, selections, error_msg="Input is NOT within selection given\n")
+FUNCTION get_user_selection(prompt_msg, selections, error_msg="Input is NOT within selections given\n")
 BEGIN
   usr_input = ""
   DOWHILE usr_input NOT IN selections
