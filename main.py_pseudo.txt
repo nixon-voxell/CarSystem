@@ -62,9 +62,9 @@ END
 FUNCTION get_user_int_range(prompt_msg, range_min, range_max, exceed_range_error_msg="Input has exceed the range given!\n")
 BEGIN
   usr_int = range_min - 1
-  DOWHILE usr_int < range_min or usr_int > range_max
+  DOWHILE usr_int < range_min OR usr_int > range_max
     usr_int = get_user_int(prompt_msg)
-    IF usr_int < range_min or usr_int > range_max THEN
+    IF usr_int < range_min OR usr_int > range_max THEN
       DISPLAY exceed_range_error_msg
     ENDIF
   ENDWHILE
@@ -133,7 +133,7 @@ BEGIN
   username = ""
   password = ""
 
-  DOWHILE username == "" or username IN usernames
+  DOWHILE username == "" OR username IN usernames
     username = get_user_not_empty("Enter username: ")
     IF username == "" THEN
       DISPLAY "Username cannot be empty!\n"
@@ -201,7 +201,7 @@ BEGIN
   model = ""
   description = ""
 
-  DOWHILE car_detail == "" or car_name IN used_car_names
+  DOWHILE car_detail == "" OR car_name IN used_car_names
 
     brand = get_user_not_empty("Enter brand: ", "Brand cannot be empty!\n")
     model = get_user_not_empty("Enter model: ", "Model cannot be empty!\n")
@@ -531,7 +531,7 @@ BEGIN
   LOOP i FROM 0 TO len(cars)
     car_detail = cars[i] SPLIT("|")
     price_detail = price[i] SPLIT("|")
-    IF view_available and car_detail[3] AS INTEGER <= 0 THEN continue
+    IF view_available AND car_detail[3] AS INTEGER <= 0 THEN continue
     ENDIF
     APPEND (i) INTO available_car_indices 
     DISPLAY "Car Index: ", i+1
