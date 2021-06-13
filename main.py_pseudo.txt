@@ -17,7 +17,7 @@ BEGIN
       DISPLAY "Input is NOT an integer\nPlease try again\n"
     ENDIF
   ENDWHILE
-  RETURN int(usr_input)
+  RETURN usr_input AS INTEGER
 END
 
 FUNCTION get_user_float(prompt_msg)
@@ -30,7 +30,7 @@ BEGIN
       DISPLAY "Input is not a number\nPlease try again\n"
     ENDIF
   ENDWHILE
-  RETURN float(usr_input)
+  RETURN usr_input AS FLOAT
 END
 
 FUNCTION get_user_not_empty(prompt_msg, error_msg="Input cannot be empty\n")
@@ -128,7 +128,7 @@ BEGIN
   APPEND new_content2 INTO filename
 END
 
-FUNCTION register_new_user(filename, usernames:list)
+FUNCTION register_new_user(filename, usernames)
 BEGIN
   username = ""
   password = ""
@@ -258,7 +258,7 @@ BEGIN
       new_info = get_user_int("\nEnter new car remaining: ")
     ENDIF
 
-    car_details[car_idx][detail_idx] = str(new_info)
+    car_details[car_idx][detail_idx] = new_info AS STRING
     modification = car_details[car_idx]
     modification = join_util(modification, "|")
 
@@ -270,7 +270,7 @@ BEGIN
     detail_idx = get_user_int_range("\nChoose price detail(1/2): ", 1, 2) - 1
     new_info = get_user_float("\nEnter new car rent price: ")
 
-    price_details[car_idx][detail_idx] = str(new_info)
+    price_details[car_idx][detail_idx] = new_info AS STRING
     modification = price_details[car_idx]
     modification = join_util(modification, "|")
 
@@ -310,7 +310,7 @@ BEGIN
         rent_details = SPLIT indices_details[history_idx] BY ","
         rent_car_date = SPLIT date_details[history_idx] BY ","
         comp
-        rent_car_date = [int(d) FOR d IN rent_car_date]
+        rent_car_date = [d AS INTEGER FOR d IN rent_car_date]
 
         rent_car_date = datetime.datetime(
 
@@ -318,7 +318,7 @@ BEGIN
           rent_car_date[2], rent_car_date[3],
           rent_car_date[4], rent_car_date[5]
         )
-        rent_car_details = car_details[int(rent_details[0])]
+        rent_car_details = car_details[rent_details[0] AS INTEGER]
         DISPLAY rent_idx_str + "Car:" , rent_car_details[0], rent_car_details[1]
         DISPLAY "Rented on:", rent_car_date
         IF rent_details[2] == "D" then
@@ -327,7 +327,7 @@ BEGIN
           DISPLAY "Rented for: ", rent_details[1], "hour(s)"
         ENDIF
 
-        IF int(rent_details[3]) == 1 THEN
+        IF rent_details[3] AS INTEGER == 1 THEN
           DISPLAY "Status: Returned"
         ELSE
           DISPLAY "Status: Not returned"
@@ -348,7 +348,7 @@ BEGIN
         rent_idx += 1
         rent_idx_str = rent_idx + ". "
         rent_details = SPLIT indices_details[history_idx] BY ","
-        rent_car_details = car_details[int(rent_details[0])]
+        rent_car_details = car_details[rent_details[0] AS INTEGER]
         DISPLAY rent_idx_str + "Car: ", rent_car_details[0], rent_car_details[1]
       ENDIF
     ENDLOOP
@@ -371,7 +371,7 @@ BEGIN
   LOOP i FROM 0 TO len(customer_names)
     DISPLAY i+1, customer_names[i]
   ENDLOOP
-  customer_idx = get_user_int_range(f"\nChoose a customer to be searched (1-{len(customer_names)}): ", 1, len(customer_names)) - 1
+  customer_idx = get_user_int_range("\nChoose a customer to be searched (1-" + len(customer_names) + "): ", 1, len(customer_names)) - 1
 
   DISPLAY "\nChoose your option below:"
   DISPLAY "1. Customer booking\n2. Customer payment"
@@ -388,7 +388,7 @@ BEGIN
         book_idx += 1
         rent_idx_str = book_idx + ". "
         rent_details = SPLIT indices_details[history_idx] BY ","
-        rent_car_details = car_details[int(rent_details[0])]
+        rent_car_details = car_details[rent_details[0] AS INTEGER]
         DISPLAY rent_idx_str + "Car: ", rent_car_details[0], rent_car_details[1]
       ENDIF
     ENDLOOP
@@ -403,10 +403,10 @@ BEGIN
         book_idx += 1
         rent_idx_str = book_idx + ". "
         rent_details = SPLIT indices_details[history_idx] BY ","
-        rent_car_details = car_details[int(rent_details[0])]
+        rent_car_details = car_details[rent_details[0] AS INTEGER]
         rent_car_date = SPLIT date_details[history_idx] BY ","
         comp
-        rent_car_date = [int(d) FOR d IN rent_car_date]
+        rent_car_date = [(d) AS INTEGER FOR d IN rent_car_date]
 
         rent_car_date = datetime.datetime(
           rent_car_date[0], rent_car_date[1],
@@ -455,7 +455,7 @@ BEGIN
       rent_details = SPLIT indices_details[history_idx] BY ","
       rent_car_date = SPLIT date_details[history_idx] BY ","
       comp
-      rent_car_date = [int(d) FOR d IN rent_car_date]
+      rent_car_date = [d AS INTEGER FOR d IN rent_car_date]
 
       rent_car_date = datetime.datetime(
         rent_car_date[0], rent_car_date[1],
@@ -464,8 +464,8 @@ BEGIN
       )
       IF rent_details[3] != "1" THEN
         APPEND history_idx INTO unreturned_history_indices 
-        APPEND (int(rent_details[0])) INTO unreturned_car_indices 
-        APPEND (str(rent_car_date)) INTO unreturned_car_dates 
+        APPEND (rent_details[0] AS INTEGER) INTO unreturned_car_indices 
+        APPEND (rent_car_date AS STRING) INTO unreturned_car_dates 
       ENDIF
     ENDIF
   ENDLOOP
@@ -476,7 +476,7 @@ BEGIN
       DISPLAY i+1, unreturned_car_detail[0], unreturned_car_detail[1]
       DISPLAY "Rented on: ", unreturned_car_dates[i]
     ENDLOOP
-    return_car_idx = get_user_int_range(f"\nChoose a car to return (1-{len(unreturned_history_indices)}): ", 1, len(unreturned_history_indices)) - 1
+    return_car_idx = get_user_int_range("\nChoose a car to return (1-" + len(unreturned_history_indices) + "): ", 1, len(unreturned_history_indices)) - 1
     rent_details = SPLIT indices_details[unreturned_history_indices[return_car_idx]] BY ","
     rent_details[3] = "1"
     indices_details[unreturned_history_indices[return_car_idx]] = join_util(rent_details, ",")
@@ -531,7 +531,7 @@ BEGIN
   LOOP i FROM 0 TO len(cars)
     car_detail = cars[i] SPLIT("|")
     price_detail = price[i] SPLIT("|")
-    IF view_available and int(car_detail[3]) <= 0 THEN continue
+    IF view_available and car_detail[3] AS INTEGER <= 0 THEN continue
     ENDIF
     APPEND (i) INTO available_car_indices 
     DISPLAY "Car Index: ", i+1
@@ -613,17 +613,17 @@ BEGIN
       rent_details = SPLIT indices_details[i] BY ","
       rent_car_date = SPLIT date_details[i] BY ","
       comp
-      rent_car_date = [int(d) FOR d IN rent_car_date]
+      rent_car_date = [d AS INTEGER FOR d IN rent_car_date]
 
       rent_car_date = datetime.datetime(
         rent_car_date[0], rent_car_date[1],
         rent_car_date[2], rent_car_date[3],
         rent_car_date[4], rent_car_date[5]
       )
-      rent_car_details = car_details[int(rent_details[0])]
+      rent_car_details = car_details[rent_details[0] AS INTEGER]
       DISPLAY rent_idx_str + "Car: ", rent_car_details[0] + ",", rent_car_details[1]
       DISPLAY "Rented on: ", rent_car_date
-      IF int(rent_details[3]) == 1 THEN
+      IF rent_details[3] AS INTEGER == 1 THEN
         DISPLAY "Status: Returned"
       ELSE
         DISPLAY "Status: Not returned"
@@ -657,16 +657,16 @@ BEGIN
   LOOP i FROM 0 TO len(date_details)
     IF date_details[i] == "-" THEN
       rent_details = SPLIT indices_details[i] BY ","
-      rent_car_details = car_details[int(rent_details[0])]
-      rent_car_price = price_details[int(rent_details[0])]
+      rent_car_details = car_details[rent_details[0] AS INTEGER]
+      rent_car_price = price_details[rent_details[0] AS INTEGER]
       DISPLAY "Car: ", rent_car_details[0], rent_car_details[1]
       DISPLAY "Description: ", rent_car_details[2]
       IF rent_details[2] == "H" THEN
         DISPLAY "Booked FOR ", rent_details[1], "hours."
-        total_price = float(rent_car_price[0])*int(rent_details[1])
+        total_price = rent_car_price[0] AS FLOAT*rent_details[1] AS INTEGER
       ELSE
         DISPLAY "Booked FOR ", rent_details[1], "days."
-        total_price = float(rent_car_price[1])*int(rent_details[1])
+        total_price = rent_car_price[1] AS FLOAT*rent_details[1] AS INTEGER
       DISPLAY "Total Price: ", "RM", total_price + "\n"
       ENDIF
     ENDIF
@@ -684,11 +684,11 @@ BEGIN
 
   available_car_indices = view_cars(True, False)
   comp
-  available_car_indices = [str(idx+1) FOR idx IN available_car_indices]
+  available_car_indices = [(idx+1) AS STRING FOR idx IN available_car_indices]
   car_idx = get_user_selection("\nSelect car index: ", available_car_indices, "Car index is NOT available FOR rent!\n")
-  car_idx = int(car_idx) - 1
+  car_idx = car_idx AS INTEGER - 1
 
-  car_details[car_idx][3] = str(int(car_details[car_idx][3]) - 1)
+  car_details[car_idx][3] = ((car_details[car_idx][3]) - 1 AS INTEGER) AS STRING
   modify_file_info(CARS_FILE, car_idx, True, join_util(car_details[car_idx], "|"))
 
   DISPLAY "\nDo you want to rent the car IN days or hours? Select '1' FOR days and '2' FOR hours"
@@ -739,15 +739,15 @@ BEGIN
   DISPLAY "\nCars booked:\n"
   LOOP idx FROM 0 TO unpaid_car_indices
     rent_details = SPLIT car_indices[curr_user_idx][idx] BY ","
-    rent_car_details = car_details[int(rent_details[0])]
-    rent_car_price = price_details[int(rent_details[0])]
+    rent_car_details = car_details[rent_details[0] AS INTEGER]
+    rent_car_price = price_details[rent_details[0] AS INTEGER]
     IF rent_details[2] == "H" THEN
-      rent_price= float(rent_car_price[0])*int(rent_details[1])
+      rent_price = rent_car_price[0] AS FLOAT*rent_details[1] AS INTEGER
       DISPLAY rent_car_details[0], rent_car_details[1], end
       DISPLAY rent_details[1], "hours", "RM", rent_price 
       total_price += rent_price
     ELSE
-      rent_price = float(rent_car_price[1])*int(rent_details[1])
+      rent_price = rent_car_price[1] AS FLOAT*rent_details[1] AS INTEGER
       DISPLAY rent_car_details[0], rent_car_details[1], end
       DISPLAY rent_details[1], "days", "RM", rent_price
       total_price += rent_price
