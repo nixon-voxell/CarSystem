@@ -94,6 +94,7 @@ END
 FUNCTION modify_file_info(filename, location, is_content1, info)
 BEGIN
   content1, content2 = get_file_info(filename)
+  READ content1, content2
 
   IF is_content1 THEN content1[location] = info
   ELSE content2[location] = info
