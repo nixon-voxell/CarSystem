@@ -197,7 +197,7 @@ BEGIN
   used_car_names = []
   LOOP i FROM 0 to len(car_details)
     car_details[i] = car_details[i].split("|")
-    used_car_names[i] = car_details[i][0].lower() + car_details[i][1].lower()
+    used_car_names[i] = LOWERCASE car_details[i][0] + LOWERCASE car_details[i][1]
   ENDLOOP
 
   car_detail = ""
