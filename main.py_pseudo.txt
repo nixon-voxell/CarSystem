@@ -197,8 +197,11 @@ BEGIN
   car_details, _ = get_file_info(CARS_FILE)
 
   comp
-  car_details = [c.split("|") FOR c IN car_details]
-  used_car_names = [c[0].lower()+c[1].lower() FOR c IN car_details]
+  used_car_names = []
+  LOOP i FROM 0 to len(car_details)
+    car_details[i] = car_details[i].split("|")
+    used_car_names[i] = car_details[i][0].lower() + car_details[i][1].lower()
+  ENDLOOP
 
   car_detail = ""
   car_name = ""
