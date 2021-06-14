@@ -64,6 +64,8 @@ BEGIN
   usr_int = range_min - 1
   DOWHILE usr_int < range_min OR usr_int > range_max
     usr_int = get_user_int(prompt_msg)
+    DISPLAY prompt_msg
+    READ usr_int
     IF usr_int < range_min OR usr_int > range_max THEN
       DISPLAY exceed_range_error_msg
     ENDIF
@@ -180,7 +182,7 @@ BEGIN
   ENDWHILE
 
   DISPLAY "Logged in!\n"
-  input "Press enter to continue..."
+  DISPLAY "Press enter to continue..."
   READ input
   os.system("cls")
   RETURN username_idx
