@@ -8,3 +8,5 @@ Nissan|Serena S-Hybrid|Long drives out of the city while reducing carbon footpri
 26.9|269.0
 Toyota|Camry|Good for traveling and business trip.|0
 30.0|315.0
+Proton|Saga|Slow and steady.|3
+10.0|100.0

@@ -401,6 +401,8 @@ def search_records():
         else:
           print(" "*len(rent_idx_str) + f"Rented for: {rent_details[1]} hour(s)")
 
+  input("Press enter to continue...")
+
 def return_rented_cars():
   car_indices, dates = get_file_info(CUSTOMER_RENTS_FILE)
   car_indices = [idx.split("|") for idx in car_indices]
