@@ -14,7 +14,7 @@ BEGIN
     DISPLAY prompt_msg
     READ usr_input
     IF NOT usr_input IS DIGIT THEN
-      DISPLAY "Input is NOT an integer\nPlease try again\n"
+      DISPLAY "Input is not an integer\nPlease try again\n"
     ENDIF
   ENDWHILE
   RETURN usr_input AS INTEGER
@@ -23,7 +23,7 @@ END
 FUNCTION get_user_float(prompt_msg)
 BEGIN
   usr_input = ""
-  DOWHILE NOT REPLACE FIRST "." WITH "" IN usr_input IS DIGIT
+  DOWHILE NOT (REPLACE FIRST "." WITH "" IN usr_input) IS DIGIT
     DISPLAY prompt_msg
     READ usr_input
     IF NOT REPLACE FIRST "." WITH "" IN usr_input IS DIGIT THEN
@@ -47,7 +47,7 @@ BEGIN
 END
 
 FUNCTION get_user_selection(prompt_msg, selections,
-  error_msg="Input is NOT within selections given\n")
+  error_msg="Input is not within selections given\n")
 BEGIN
   usr_input = ""
   DOWHILE usr_input NOT IN selections
@@ -153,7 +153,7 @@ BEGIN
     ENDIF
   ENDWHILE
 
-  DISPLAY "Your username and password is ", username, + "," , password
+  DISPLAY "Your username and password is " + username + "," + password
   
   APPEND (username + "\n" + password + "\n") INTO filename
 END
@@ -168,7 +168,7 @@ BEGIN
   DOWHILE username NOT IN usernames
     username = get_user_not_empty("Username: ")
     IF username NOT IN usernames THEN
-      DISPLAY "Username NOT found\nPlease try again\n"
+      DISPLAY "Username not found\nPlease try again\n"
     ELSE
       username_idx = INDEX username FROM usernames
     ENDIF
@@ -291,6 +291,7 @@ BEGIN
   LOOP i FROM 0 TO len(car_indices)
     car_indices[i] = SPLIT car_indices[i] BY "|"
     dates[i] = SPLIT dates[i] BY "|"
+  ENDLOOP
 
   car_details, price_details = get_file_info(CARS_FILE)
 
@@ -492,7 +493,7 @@ BEGIN
     ENDIF
   ENDLOOP
   IF len(unreturned_history_indices) > 0 THEN
-    DISPLAY "\nCars that are NOT returned by: ", usernames[customer_idx]
+    DISPLAY "\nCars that are not returned by: ", usernames[customer_idx]
     LOOP i FROM 0 TO len(unreturned_car_indices)
       unreturned_car_detail = car_details[unreturned_car_indices[i]]
       DISPLAY i+1, unreturned_car_detail[0], unreturned_car_detail[1]
@@ -722,7 +723,7 @@ BEGIN
     CONVERT available_car_indices[i] INTO STRING
   ENDLOOP
 
-  car_idx = get_user_selection("\nSelect car index: ", available_car_indices, "Car index is NOT available for rent!\n")
+  car_idx = get_user_selection("\nSelect car index: ", available_car_indices, "Car index is not available for rent!\n")
   car_idx = car_idx AS INTEGER - 1
 
   car_details[car_idx][3] = ((car_details[car_idx][3]) - 1 AS INTEGER) AS STRING
@@ -780,7 +781,7 @@ BEGIN
 
   total_price = 0
   DISPLAY "\nCars booked:\n"
-  LOOP idx FROM 0 TO unpaid_car_indices
+  LOOP idx FROM 0 TO len(unpaid_car_indices)
     rent_details = SPLIT car_indices[curr_user_idx][idx] BY ","
     rent_car_details = car_details[rent_details[0] AS INTEGER]
     rent_car_price = price_details[rent_details[0] AS INTEGER]
@@ -802,7 +803,7 @@ BEGIN
   pay = get_user_int_range("Choose option (1/2): ", 1, 2)
   IF pay == 1 THEN
     current_time = datetime.datetime.now().strftime("%Y,%m,%d,%H,%M,%S")
-    LOOP idx FROM 0 TO unpaid_car_indices
+    LOOP idx FROM 0 TO len(unpaid_car_indices)
       dates[curr_user_idx][idx] = current_time
     ENDLOOP
     modify_file_info(CUSTOMER_RENTS_FILE, curr_user_idx, False, join_util(dates[curr_user_idx], "|"))
