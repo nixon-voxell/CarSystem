@@ -435,6 +435,7 @@ def return_rented_cars():
     if date_details[history_idx] != "-":
       rent_details = indices_details[history_idx].split(",")
       rent_car_date = date_details[history_idx].split(",")
+      if rent_car_date[0] == "": continue
       # convert all string elements from string to integer
       rent_car_date = [int(d) for d in rent_car_date]
       # create readable datetime format
