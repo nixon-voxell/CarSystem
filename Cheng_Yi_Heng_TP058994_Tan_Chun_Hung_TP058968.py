@@ -285,6 +285,7 @@ def display_records():
 
   # show rented cars START
   print("\nRented cars:")
+  print(len(car_indices))
   for customer_idx in range(len(car_indices)):
     date_details = dates[customer_idx]
     indices_details = car_indices[customer_idx]
@@ -298,6 +299,9 @@ def display_records():
         rent_idx_str = f"{rent_idx}. "
         rent_details = indices_details[history_idx].split(",")
         rent_car_date = date_details[history_idx].split(",")
+        if rent_car_date[0] == "":
+          print("No cars rented.")
+          break
         # convert all string elements from string to integer
         rent_car_date = [int(d) for d in rent_car_date]
         # create readable datetime format
@@ -326,6 +330,9 @@ def display_records():
     print(f"\nCars booked by: {usernames[customer_idx]}\n")
     rent_idx = 0
     for history_idx in range(len(indices_details)):
+      if date_details[history_idx] == "":
+        print("No cars booked.")
+        break
       if date_details[history_idx] == "-":
         rent_idx += 1
         rent_idx_str = f"{rent_idx}. "
@@ -575,6 +582,9 @@ def view_history(curr_user_idx:int) -> None:
       rent_idx_str = f"{rent_idx}. "
       rent_details = indices_details[i].split(",")
       rent_car_date = date_details[i].split(",")
+      if rent_car_date[0] == "":
+        print("No cars rented.")
+        break
       # convert all string elements from string to integer
       rent_car_date = [int(d) for d in rent_car_date]
       # create readable datetime format
@@ -606,6 +616,9 @@ def view_booked_cars(curr_user_idx:int) -> None:
   indices_details = car_indices[curr_user_idx]
 
   for i in range(len(date_details)):
+    if date_details[i] == "":
+      print("No cars booked.")
+      break
     if date_details[i] == "-":
       rent_details = indices_details[i].split(",")
       rent_car_details = car_details[int(rent_details[0])]
